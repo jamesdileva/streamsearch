@@ -12,8 +12,7 @@
 
 ## Status
 
-Sprint 0.1 — bootstrapping. See `docs/sprint-roadmap.md`.
-No `frontend/` / `backend/` yet.
+Sprint 0.1 done — repo + Vite React-TS shell + FastAPI health + fake-adapter placeholder, frontend displays backend health. See `docs/sprint-roadmap.md` (next: 0.2 architecture skeleton).
 
 ## Target stack
 
@@ -23,17 +22,32 @@ No `frontend/` / `backend/` yet.
 - Search (MVP): deterministic scoring; FTS later; embeddings only if proven needed
 - Cache (MVP): in-memory short-lived server cache
 
-## Quickstart (after Sprint 0.1 scaffold)
+## Quickstart
 
 ```powershell
 # backend (from backend/)
 # copy ../.env.example to .env first, fill keys
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload   # http://localhost:8000/api/health
 
 # frontend (from frontend/)
+# copy .env.example to .env (VITE_API_URL=http://localhost:8000)
 npm install
-npm run dev
+npm run dev                               # http://localhost:5173
+```
+
+## Checks (Sprint 0.1 toolchain — enforced)
+
+```powershell
+# backend (from backend/)
+python -m pytest -q
+python -m ruff check .
+
+# frontend (from frontend/)
+npm run typecheck   # tsc --noEmit
+npm run lint        # oxlint
+npm run test        # vitest run
+npm run build
 ```
 
 - Backend health: `GET /api/health`

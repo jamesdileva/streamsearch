@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import ResultsList from './components/ResultsList';
+import SearchBar from './components/SearchBar';
 import { fetchHealth, searchStreams } from './services/api';
 import type { Stream } from './types';
 
@@ -7,10 +9,12 @@ type HealthState =
   | { status: 'ok'; env: string }
   | { status: 'error'; message: string };
 
-type PreviewState =
-  | { status: 'loading' }
-  | { status: 'ok'; stream: Stream | null }
-  | { status: 'error'; message: string };
+type SearchState =
+  | { status: 'idle' }
+  | { status: 'empty-query' }
+  | { status: 'loading'; query: string }
+  | { status: 'ok'; query: string; streams: Stream[] }
+  | { status: 'error'; query: string; message: string };
 
 function errMessage(e: unknown): string {
   return e instanceof Error ? e.message : 'unknown error';
@@ -18,7 +22,7 @@ function errMessage(e: unknown): string {
 
 export default function App() {
   const [health, setHealth] = useState<HealthState>({ status: 'loading' });
-  const [preview, setPreview] = useState<PreviewState>({ status: 'loading' });
+  const [search, setSearch] = useState<SearchState>({ status: 'idle' });
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -30,52 +34,65 @@ export default function App() {
     return () => ctrl.abort();
   }, []);
 
-  // Sprint 0.2 skeleton preview: proves a normalized adapter record
-  // renders in the UI. Real search UI lands in Sprint 1.1.
-  useEffect(() => {
-    const ctrl = new AbortController();
-    searchStreams('skeleton', ctrl.signal)
+  // Submit search (debounced/submit only — never per-keystroke fan-out).
+  const runSearch = (raw: string) => {
+    const query = raw.trim();
+    if (!query) {
+      setSearch({ status: 'empty-query' });
+      return;
+    }
+    setSearch({ status: 'loading', query });
+    searchStreams(query)
       .then((r) =>
-        setPreview({ status: 'ok', stream: r.results[0] ?? null }),
+        setSearch({ status: 'ok', query, streams: r.results }),
       )
       .catch((e: unknown) =>
-        setPreview({ status: 'error', message: errMessage(e) }),
+        setSearch({ status: 'error', query, message: errMessage(e) }),
       );
-    return () => ctrl.abort();
-  }, []);
+  };
 
   return (
     <main style={{ maxWidth: 640, margin: '0 auto', padding: 24 }}>
       <h1>StreamSearch</h1>
       <p>What are you looking for happening live?</p>
-      {health.status === 'loading' && <p>Checking backend…</p>}
+      <SearchBar
+        isLoading={search.status === 'loading'}
+        onSearch={runSearch}
+      />
+
+      <section aria-label="search results" aria-live="polite">
+        {search.status === 'idle' && (
+          <p data-testid="search-prompt">
+            Enter a topic above to search live streams.
+          </p>
+        )}
+        {search.status === 'empty-query' && (
+          <p data-testid="search-hint">Type a topic above to search.</p>
+        )}
+        {search.status === 'loading' && (
+          <p data-testid="search-loading">Searching for “{search.query}”…</p>
+        )}
+        {search.status === 'ok' && search.streams.length > 0 && (
+          <ResultsList streams={search.streams} />
+        )}
+        {search.status === 'ok' && search.streams.length === 0 && (
+          <p data-testid="search-empty">
+            No live streams found for “{search.query}”.
+          </p>
+        )}
+        {search.status === 'error' && (
+          <p data-testid="search-error">
+            Search failed for “{search.query}”: {search.message}
+          </p>
+        )}
+      </section>
+
       {health.status === 'ok' && (
         <p data-testid="backend-health">Backend: ok ({health.env})</p>
       )}
       {health.status === 'error' && (
         <p data-testid="backend-error">Backend unreachable: {health.message}</p>
       )}
-
-      <section aria-label="skeleton preview">
-        <h2>Skeleton preview (fake adapter)</h2>
-        {preview.status === 'loading' && <p>Loading preview…</p>}
-        {preview.status === 'ok' && preview.stream && (
-          <article data-testid="skeleton-stream">
-            <p>
-              [{preview.stream.live_status}] {preview.stream.title}
-            </p>
-            <p>
-              {preview.stream.channel_name} · {preview.stream.platform}
-            </p>
-          </article>
-        )}
-        {preview.status === 'ok' && !preview.stream && (
-          <p data-testid="skeleton-empty">No preview stream.</p>
-        )}
-        {preview.status === 'error' && (
-          <p data-testid="skeleton-error">Preview failed: {preview.message}</p>
-        )}
-      </section>
     </main>
   );
 }

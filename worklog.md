@@ -19,3 +19,11 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
 - What: encoded sprint loop `plan → scope → implement → verify → commit → worklog → push` in `AGENTS.md §3b`; clarified feature-branch model (`feat/<sprint>-<slug>`, merge to `main`); created this `worklog.md`
 - Verification: n/a (docs only)
 - Commit: `bd5a50e docs: sprint loop workflow + worklog (plan-scope-implement-verify-commit-worklog-push)`
+
+## 2026-10-02 — Remote created + push
+
+- Sprint: process only (no code)
+- Branch: `main`
+- What: created public GitHub repo `jamesdileva/streamsearch` via `gh repo create streamsearch --public --source=. --push`; `main` now tracks `origin/main`
+- Verification: `git remote -v` shows origin; `git status -sb` clean, `main...origin/main`
+- Commit: `923609d docs: worklog commit hash` (+ this entry pending)

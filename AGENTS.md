@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 0.2 done — `backend/app/api` router (`/api/health`, `/api/search` skeleton), `models/stream.py` (`Stream` + `SearchResponse`), `services/search.py` placeholder, error envelope, `FakeAdapter` fixture; `frontend/` service layer + skeleton preview. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 1.1 done — `frontend/src/components` (`SearchBar`, `ResultsList`) + `App` search flow (idle/empty-query/loading/ok/error, responsive CSS) wired to `/api/search` skeleton. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

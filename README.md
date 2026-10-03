@@ -12,7 +12,7 @@
 
 ## Status
 
-Sprint 0.2 done — API routing layer (`/api/health`, `/api/search` skeleton via `FakeAdapter` → normalized `Stream`), error envelope `{"error": {"code", "message"}}`, search service placeholder, frontend service layer renders skeleton preview. See `docs/sprint-roadmap.md` (next: 1.1 search interface).
+Sprint 1.1 done — search interface (`SearchBar` + results with loading/empty/error/idle states, responsive layout) against the fake-adapter placeholder. See `docs/sprint-roadmap.md` (next: 1.2 YouTube adapter).
 
 ## Target stack
 

@@ -18,4 +18,4 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
 - Branch: `main`
 - What: encoded sprint loop `plan → scope → implement → verify → commit → worklog → push` in `AGENTS.md §3b`; clarified feature-branch model (`feat/<sprint>-<slug>`, merge to `main`); created this `worklog.md`
 - Verification: n/a (docs only)
-- Commit: _pending_
+- Commit: `bd5a50e docs: sprint loop workflow + worklog (plan-scope-implement-verify-commit-worklog-push)`

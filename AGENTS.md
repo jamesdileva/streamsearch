@@ -33,7 +33,23 @@ Toolchain (establish in Sprint 0.1, then enforce):
 └── .gitignore
 ```
 
-Current state: docs live in root, no `frontend/`/`backend/` yet. Sprint 0.1 scaffolds them.
+Current state: docs in `docs/`, no `frontend/`/`backend/` yet. Sprint 0.1 scaffolds them.
+
+## 3b. Sprint loop (mandatory for every sprint)
+
+For every sprint do in order: `plan → scope → implement → verify → commit → worklog → push`.
+
+1. Plan — read the roadmap sprint. State Goal / Work / Non-goals / Verification. Create todo list.
+2. Scope — one vertical slice only. List files to touch. No drive-by refactors or next-sprint work.
+3. Implement — code + minimal docs updates. Respect §4–§6 (adapters, normalized model, quota/security).
+4. Verify (tests) — run relevant checks and record results:
+   - Backend (if touched): `pytest`, `ruff check .`
+   - Frontend (if touched): `npx tsc --noEmit`, `npm run lint`, `npm run test`
+   - Manual checklist from roadmap sprint (e.g. 5 queries, states, failure injection). Real platform APIs only for controlled smoke tests; mocks otherwise.
+   - If checks fail, fix before committing.
+5. Commit — Conventional Commits with sprint ref (e.g. `feat: sprint 0.1 frontend shell + health wiring`). One logical commit per sprint unless split is justified.
+6. Worklog — append to `worklog.md`: date, sprint, branch, what changed, verification run + result, commit hash. Keep it append-only, newest at bottom.
+7. Push — push branch, merge to `main`, push `main` (see §8). If no GitHub remote yet, create with `gh repo create streamsearch` (confirm private/public first), then push.
 
 ## 3. How to work (mandatory)
 
@@ -80,8 +96,11 @@ Current state: docs live in root, no `frontend/`/`backend/` yet. Sprint 0.1 scaf
 
 ## 8. Git / PR hygiene
 
+- Do NOT work directly on `main` for sprint work. `main` stays green/deployable.
 - Branch: `feat/<sprint>-<slug>` (e.g. `feat/0-1-repo-bootstrap`). Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`).
+- Per-sprint flow: branch → implement → verify → commit → update `worklog.md` (can amend into sprint commit or separate `docs: worklog` — be consistent) → push branch → merge to `main` (PR if remote exists, else local `git merge --no-ff`) → push `main`.
 - PRs: link sprint (e.g. `Sprint 0.1`), describe verification performed, no secrets, update `docs/` if architecture/contract changed.
+- Remote (once created): `github.com/<user>/streamsearch`. Create via `gh repo create streamsearch --private|--public --source=. --push` only after confirming visibility. Never force-push `main`.
 - Definition of MVP done: user can open site → search topic/event → get normalized YouTube results → see live/freshness + source/creator → watch via embed or open source → report bad results → repeat searches without excessive API use.
 
 ## 9. For agents: do / do not

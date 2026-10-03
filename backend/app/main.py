@@ -1,8 +1,10 @@
-"""StreamSearch API (Sprint 0.1 bootstrap)."""
+"""StreamSearch API (Sprint 0.2 skeleton)."""
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api import api_router
+from app.api.errors import register_error_handlers
 from app.config import settings
 
 app = FastAPI(title="StreamSearch API")
@@ -15,7 +17,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@app.get("/api/health")
-def health() -> dict[str, str]:
-    return {"status": "ok", "env": settings.app_env}
+register_error_handlers(app)
+app.include_router(api_router)

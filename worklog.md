@@ -26,4 +26,16 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
 - Branch: `main`
 - What: created public GitHub repo `jamesdileva/streamsearch` via `gh repo create streamsearch --public --source=. --push`; `main` now tracks `origin/main`
 - Verification: `git remote -v` shows origin; `git status -sb` clean, `main...origin/main`
-- Commit: `923609d docs: worklog commit hash` (+ this entry pending)
+- Commit: `923609d docs: worklog commit hash` (+ `6d02c18 docs: log remote creation + push`)
+
+## 2026-10-03 — Sprint 0.1 Repository Bootstrap
+
+- Sprint: 0.1 (Goal: clean foundation with working frontend/backend connection)
+- Branch: `feat/0-1-repo-bootstrap`
+- What: Vite React-TS shell (`App` fetches `GET /api/health` via `src/services/api.ts`, loading/ok/error states); FastAPI `app/main.py` (`/api/health`), env-only `app/config.py`, `adapters/base.py` (`BasePlatformAdapter` + `FakeAdapter`); toolchain locked (backend `ruff`, frontend `oxlint` + `vitest` + `tsc`); README quickstart + checks; removed Vite demo leftovers; `VITE_API_URL` via `frontend/.env.example`
+- Non-goals (deferred): search UI (1.1), real YouTube adapter (1.2), DB/index/cache, Postgres/Redis, embeddings
+- Verification:
+  - Backend: `python -m pytest -q` → 1 passed; `python -m ruff check .` → clean; live `GET /api/health` → `{"status":"ok","env":"development"}`
+  - Frontend: `npm run typecheck` OK; `npm run lint` (oxlint) OK; `npm run test` (vitest) → 2 passed; `npm run build` OK; dev server `http://localhost:5173/` → HTTP 200
+  - Secrets: staged leak check empty (no `node_modules`/`dist`/`.env`/`__pycache__` tracked); no `.env` committed
+- Commit: `bac97c8 feat: sprint 0.1 frontend shell + health wiring` (+ this worklog entry pending)

@@ -16,9 +16,9 @@ Source of truth for product/architecture:
 - Search (MVP): deterministic scoring over stored fields. Later: SQLite FTS5 / Postgres FTS. Embeddings/vector search ONLY after `sprint-roadmap.md 7.1` failure dataset proves keyword search insufficient.
 - Caching (MVP): in-memory + short-lived server cache keyed by normalized query. Redis only if traffic/polling justifies it.
 
-Toolchain (establish in Sprint 0.1, then enforce):
-- Frontend: `npm run dev`, `npm run build`, `npm run lint`, `npm run test`, `npx tsc --noEmit`
-- Backend: `uvicorn app.main:app --reload` (from `backend/`), `pytest`, `ruff check .`, `black --check .` (or `ruff format --check .` — pick one and document in README)
+Toolchain (locked in Sprint 0.1, enforce every sprint):
+- Frontend (from `frontend/`): `npm run dev`, `npm run build`, `npm run lint` (oxlint), `npm run test` (vitest), `npm run typecheck` (`tsc --noEmit`)
+- Backend (from `backend/`): `python -m uvicorn app.main:app --reload`, `python -m pytest -q`, `python -m ruff check .` (use `python -m` prefix if shims aren't on PATH; no black — `ruff` only)
 
 ## 2. Target repo layout
 
@@ -33,7 +33,7 @@ Toolchain (establish in Sprint 0.1, then enforce):
 └── .gitignore
 ```
 
-Current state: docs in `docs/`, no `frontend/`/`backend/` yet. Sprint 0.1 scaffolds them.
+Current state: Sprint 0.1 done — `frontend/` (Vite React-TS, oxlint, vitest) + `backend/` (FastAPI health, `FakeAdapter` placeholder). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

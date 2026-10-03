@@ -12,7 +12,7 @@
 
 ## Status
 
-Sprint 0.1 done — repo + Vite React-TS shell + FastAPI health + fake-adapter placeholder, frontend displays backend health. See `docs/sprint-roadmap.md` (next: 0.2 architecture skeleton).
+Sprint 0.2 done — API routing layer (`/api/health`, `/api/search` skeleton via `FakeAdapter` → normalized `Stream`), error envelope `{"error": {"code", "message"}}`, search service placeholder, frontend service layer renders skeleton preview. See `docs/sprint-roadmap.md` (next: 1.1 search interface).
 
 ## Target stack
 

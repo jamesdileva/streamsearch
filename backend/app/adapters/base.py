@@ -1,6 +1,7 @@
-"""Placeholder adapter interface (Sprint 0.1). Real YouTube adapter lands in 1.2."""
+"""Adapter interface + fake adapter (Sprint 0.2). Real YouTube adapter lands in 1.2."""
 
 from abc import ABC, abstractmethod
+from datetime import datetime, timezone
 from typing import Any
 
 
@@ -20,9 +21,38 @@ class BasePlatformAdapter(ABC):
 
 
 class FakeAdapter(BasePlatformAdapter):
-    """Minimal stub to prove the normalization boundary (used in 0.2)."""
+    """Fixture adapter proving the normalization boundary.
+
+    Returns one normalized stream dict per query (no platform SDK involved).
+    """
 
     platform = "fake"
 
     def search(self, query: str) -> list[dict[str, Any]]:
-        return []
+        now = datetime.now(timezone.utc).isoformat()
+        return [
+            {
+                "id": "fake-1",
+                "platform": self.platform,
+                "platform_stream_id": "fake-1",
+                "channel_id": "fake-channel-1",
+                "channel_name": "Skeleton Channel",
+                "title": f"Skeleton live: {query.strip()}",
+                "description": "Fixture stream proving adapter → model mapping.",
+                "thumbnail_url": "",
+                "source_url": "https://example.com/watch/fake-1",
+                "embed_url": None,
+                "embed_supported": False,
+                "live_status": "live",
+                "started_at": now,
+                "discovered_at": now,
+                "last_verified_at": now,
+                "viewer_count": None,
+                "category": None,
+                "tags": ["skeleton"],
+                "latitude": None,
+                "longitude": None,
+                "location_text": None,
+                "metadata": {"adapter": "fake"},
+            }
+        ]

@@ -256,6 +256,31 @@ code {
   white-space: nowrap;
 }
 
+.stream-report {
+  font-size: 14px;
+}
+
+.report-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.report-form fieldset {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 0;
+  padding: 8px;
+}
+
+.report-form label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
 @media (max-width: 480px) {
   .search-bar {
     flex-direction: column;

@@ -12,7 +12,7 @@
 
 ## Status
 
-Sprint 2.2 done — live freshness as trust labels (`fresh` ≤5m, `aging` <30m, `stale`, `ended`; thresholds via `FRESHNESS_*_SECONDS`), stamped server-side on every result and shown on each card (`● LIVE · Fresh`, `Aging · verified 12m ago`, `Stale · not verified`). Card-vs-source comparison **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
+Sprint 2.3 done — user correction flow (`Report` on every card → Broken link / No longer live / Wrong topic / Other → `POST /api/reports`, SQLite-persisted, listed via `GET /api/reports`). Card-vs-source comparison **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
 
 ```powershell
 # backend/.env: YOUTUBE_API_KEY=<key> (never commit it)
@@ -23,7 +23,7 @@ python -m uvicorn app.main:app --reload
 # links open the live broadcast, platform identified, no raw API fields in UI.
 ```
 
-See `docs/sprint-roadmap.md` (next: 2.3 broken/stale reporting).
+See `docs/sprint-roadmap.md` (next: 3.1 deterministic relevance).
 
 ## Target stack
 

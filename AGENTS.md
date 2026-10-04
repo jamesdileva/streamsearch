@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 2.2 done — freshness trust labels (`fresh`/`aging`/`stale`/`ended`, env-configured thresholds) stamped by the service and shown on cards with verified-age; simulations pinned in `tests/test_freshness.py`; revalidation machinery waits for the index (4.2/4.3). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 2.3 done — reports end-to-end (`ReportButton` per card → `POST /api/reports` → SQLite table, `GET /api/reports` list/filter); full abuse controls wait for 11.2 (only 500-char detail cap today). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

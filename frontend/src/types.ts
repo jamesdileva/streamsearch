@@ -3,7 +3,7 @@ export interface HealthResponse {
   env: string;
 }
 
-// Normalized stream (mirrors backend Stream model, Sprint 0.2 skeleton subset).
+// Normalized stream (mirrors backend Stream model; card-relevant subset).
 export interface Stream {
   id: string;
   platform: string;
@@ -12,8 +12,14 @@ export interface Stream {
   channel_name: string;
   title: string;
   description: string;
+  thumbnail_url: string;
   source_url: string;
+  embed_url: string | null;
+  embed_supported: boolean;
   live_status: 'live' | 'ended' | 'unknown';
+  started_at: string | null;
+  viewer_count: number | null;
+  location_text: string | null;
 }
 
 export interface SearchResponse {

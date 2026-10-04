@@ -12,7 +12,7 @@
 
 ## Status
 
-Sprint 2.3 done — user correction flow (`Report` on every card → Broken link / No longer live / Wrong topic / Other → `POST /api/reports`, SQLite-persisted, listed via `GET /api/reports`). Card-vs-source comparison **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
+Sprint 3.1 done — deterministic relevance (`app/search/scoring.py`: title exact/token, description, tags/category, location, freshness, log-scaled viewers as tiebreak-only; ended sorts last; query-relative `score` stamped per result). Ordering proven on a labeled set; semantic retrieval waits for the 7.1 failure dataset. Card-vs-source comparison **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
 
 ```powershell
 # backend/.env: YOUTUBE_API_KEY=<key> (never commit it)
@@ -23,7 +23,7 @@ python -m uvicorn app.main:app --reload
 # links open the live broadcast, platform identified, no raw API fields in UI.
 ```
 
-See `docs/sprint-roadmap.md` (next: 3.1 deterministic relevance).
+See `docs/sprint-roadmap.md` (next: 3.2 search normalization).
 
 ## Target stack
 

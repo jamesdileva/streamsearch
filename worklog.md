@@ -132,4 +132,18 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Frontend: `npm run typecheck` OK; `npm run lint` clean; `npm run test` → 27 passed (8 new: 4 reasons, details, error, cancel); `npm run build` OK; dev server → HTTP 200
   - Live: `POST /api/reports` → 201 + `GET /api/reports?stream_id=` round-trip; smoke `.db` removed after, `*.db` gitignored
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/key tracked
-- Commit: `07bf8e5 feat: sprint 2.3 stale reporting (...)` (+ this worklog entry pending)
+- Commit: `07bf8e5 feat: sprint 2.3 stale reporting (...)` (+ `54f4cc7 docs: worklog sprint 2.3`, merge `b1bebbe`)
+
+## 2026-10-04 — Sprint 3.1 Deterministic Relevance
+
+- Sprint: 3.1 (Goal: stop treating every API result as equally useful)
+- Branch: `feat/3-1-deterministic-relevance`
+- What: `app/search/scoring.py` (`Weights` frozen dataclass + defaults, `score_stream` breakdown, `rank_streams`; title exact 100 / token 40, location 50, description/tags 15, freshness 20, viewers 5 log-scaled; ended partition last, stable ties); service ranks + stamps `Stream.score`; UI order-only (no score display); tokenizer lives in scoring (3.2 builds on it)
+- Non-goals (deferred): query normalization/synonyms (3.2); location parsing (3.3); semantic retrieval (waits for 7.1 dataset)
+- Verification:
+  - Backend: `python -m pytest -q` → 55 passed (11 new labeled-set: exact>token>irrelevant, desc/tag/location lifts, freshness tiebreak, ended demotion, viewers tiebreak-only + never-beats-title, custom weights, stable ties, empty query, cross-adapter service ranking); `python -m ruff check .` → clean
+  - Frontend (type touch-up only): `npm run typecheck` OK; `npm run lint` clean; `npm run test` → 27 passed; `npm run build` OK; dev server → HTTP 200
+  - Corrections during verify: multi-token labeled query (single-token makes token-fractions binary); fixed own duplicated imports in `search.py`
+  - Live: `GET /api/search?q=wildfire` → `"score":160.0` stamped
+  - Secrets: staged leak check empty; no `.env`/key tracked
+- Commit: `5beee37 feat: sprint 3.1 deterministic relevance (...)` (+ this worklog entry pending)

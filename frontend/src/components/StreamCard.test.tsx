@@ -21,6 +21,7 @@ const FULL: Stream = {
   last_verified_at: new Date().toISOString(),
   viewer_count: 1234,
   location_text: 'Florida',
+  score: 160.0,
 };
 
 const MINIMAL: Stream = {
@@ -41,6 +42,7 @@ const MINIMAL: Stream = {
   last_verified_at: null,
   viewer_count: null,
   location_text: null,
+  score: null,
 };
 
 test('full record shows every card element', () => {

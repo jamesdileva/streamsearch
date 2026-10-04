@@ -22,6 +22,7 @@ const STREAM: Stream = {
   last_verified_at: new Date().toISOString(),
   viewer_count: null,
   location_text: null,
+  score: null,
 };
 
 function submitQuery(value: string) {

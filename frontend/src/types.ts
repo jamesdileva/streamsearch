@@ -24,6 +24,9 @@ export interface Stream {
   last_verified_at: string | null;
   viewer_count: number | null;
   location_text: string | null;
+  // Query-relative ranking score stamped by the backend (Sprint 3.1).
+  // Displayed nowhere; result order is the feature.
+  score: number | null;
 }
 
 export interface SearchResponse {

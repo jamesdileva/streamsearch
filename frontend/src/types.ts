@@ -31,3 +31,17 @@ export interface SearchResponse {
   results: Stream[];
   count: number;
 }
+
+// Correction reports (mirrors backend report model).
+export type ReportReason =
+  | 'broken_link'
+  | 'no_longer_live'
+  | 'wrong_topic'
+  | 'other';
+
+export interface ReportCreate {
+  stream_id: string;
+  platform: string;
+  reason: ReportReason;
+  detail?: string;
+}

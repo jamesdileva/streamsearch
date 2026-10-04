@@ -2,6 +2,7 @@ import { Fragment, type ReactNode } from 'react';
 import type { Stream } from '../types';
 import LiveStatus from './LiveStatus';
 import PlatformBadge from './PlatformBadge';
+import ReportButton from './ReportButton';
 
 // Restrained card: every field comes from the normalized Stream model.
 // Anything the platform didn't provide is simply omitted ("where available").
@@ -86,6 +87,12 @@ export default function StreamCard({ stream }: { stream: Stream }) {
             )}
           </div>
         )}
+        <div className="stream-report">
+          <ReportButton
+            streamId={stream.platform_stream_id}
+            platform={stream.platform}
+          />
+        </div>
       </div>
     </article>
   );

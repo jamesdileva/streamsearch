@@ -119,4 +119,17 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Frontend: `npm run typecheck` OK; `npm run lint` clean; `npm run test` → 19 passed (time buckets, aging verified-age, ended suppresses note); `npm run build` OK; dev server → HTTP 200
   - Live: `GET /api/search?q=storm` → `"freshness":"fresh"` stamped
   - Secrets: staged leak check empty; no `.env`/key tracked
-- Commit: `5f63222 feat: sprint 2.2 live freshness (...)` (+ this worklog entry pending)
+- Commit: `5f63222 feat: sprint 2.2 live freshness (...)` (+ `6e5131b docs: worklog sprint 2.2`, merge `f4e638f`)
+
+## 2026-10-04 — Sprint 2.3 Broken/Stale Reporting
+
+- Sprint: 2.3 (Goal: users feed corrections back into the system)
+- Branch: `feat/2-3-reporting`
+- What: `ReportButton` per card (4 radio reasons + optional ≤500-char detail + sent/error states); `POST /api/reports` → 201 SQLite-persisted `Report`; `GET /api/reports` list + `stream_id` filter; keyed on `platform_stream_id`; only light validation today (full abuse controls wait for 11.2)
+- Non-goals (deferred): moderation UI/takedown handling (11.1); report-driven revalidation (uses index from 4.2+); rate limiting (10.2)
+- Verification:
+  - Backend: `python -m pytest -q` → 44 passed (9 new: all 4 reasons persist + list/filter/detail round-trip/422s); `python -m ruff check .` → clean (fixed whitespace-only `stream_id` via `StringConstraints`)
+  - Frontend: `npm run typecheck` OK; `npm run lint` clean; `npm run test` → 27 passed (8 new: 4 reasons, details, error, cancel); `npm run build` OK; dev server → HTTP 200
+  - Live: `POST /api/reports` → 201 + `GET /api/reports?stream_id=` round-trip; smoke `.db` removed after, `*.db` gitignored
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/key tracked
+- Commit: `07bf8e5 feat: sprint 2.3 stale reporting (...)` (+ this worklog entry pending)

@@ -73,7 +73,13 @@ export default function App() {
           <p data-testid="search-loading">Searching for “{search.query}”…</p>
         )}
         {search.status === 'ok' && search.streams.length > 0 && (
-          <ResultsList streams={search.streams} />
+          <>
+            <p data-testid="search-count">
+              Found {search.streams.length} live stream
+              {search.streams.length === 1 ? '' : 's'} for “{search.query}”.
+            </p>
+            <ResultsList streams={search.streams} />
+          </>
         )}
         {search.status === 'ok' && search.streams.length === 0 && (
           <p data-testid="search-empty">

@@ -194,3 +194,13 @@ def test_search_service_validates_adapter_records():
     assert res.query == "wildfire"
     assert res.count == 1
     assert res.results[0].platform == "youtube"
+
+
+def test_youtube_raw_records_contain_only_normalized_fields():
+    # No raw YouTube shapes may reach the API/UI boundary.
+    adapter = YouTubeAdapter(api_key="k", client=_ok_client())
+    records = adapter.search("wildfire")
+    assert records, "expected at least one record to inspect"
+    for raw in records:
+        assert set(raw) <= set(Stream.model_fields)
+        Stream(**raw)

@@ -78,4 +78,18 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Correction during verify: key in query string is by YouTube API design (HTTPS) — test asserts key absence from error messages instead
   - Secrets: staged leak check empty; no `.env`/key tracked
 - Deferred smoke procedure (run once `YOUTUBE_API_KEY` exists): set key in `backend/.env`, restart uvicorn, `GET /api/search?q=` for news/wildfire/storm/gaming/concert → expect `platform: youtube` records each with `actualStartTime`-backed `started_at`; open `source_url`s to confirm actually live
-- Commit: `18b38e6 feat: sprint 1.2 youtube adapter (key-gated, mocked tests)` (+ this worklog entry pending)
+- Commit: `18b38e6 feat: sprint 1.2 youtube adapter (key-gated, mocked tests)` (+ `026c44e docs: worklog sprint 1.2`, merge `b095afd`)
+
+## 2026-10-04 — Sprint 1.3 Real Search Results (source-truth half deferred)
+
+- Sprint: 1.3 (Goal: full chain end-to-end; still no key, so source-truth checks deferred)
+- Branch: `feat/1-3-real-search-results`
+- What: `AdapterError` → 502 envelope in search route (no internals leak; per-platform status stays in 10.1); parametrized 5-query sweep test; response-keys ⊆ `Stream` fields test (API + YouTube raw records); result-count line in UI ("Found N live streams")
+- Non-goals (deferred): title/thumbnail/link-vs-source matching until key; card polish (2.1); per-platform status/partial results (10.1)
+- Verification:
+  - Backend: `python -m pytest -q` → 24 passed; `python -m ruff check .` → clean (fixed own duplicated route def, F811)
+  - Frontend: `npm run typecheck` OK; `npm run lint` OK; `npm run test` → 13 passed; `npm run build` OK; dev server → HTTP 200
+  - Live: no-key smoke `GET /api/search?q=gaming` → fake fixture; chain SearchBar→rows intact
+  - Secrets: staged leak check empty; no `.env`/key tracked
+- Deferred (once key exists): 5-query source-truth pass per README procedure — results appear, titles/thumbnails match source, links open live broadcasts, platform identified, no raw API fields in UI
+- Commit: `c963b61 feat: sprint 1.3 real search chain (...)` (+ this worklog entry pending)

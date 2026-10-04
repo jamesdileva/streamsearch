@@ -106,4 +106,17 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Fixes during verify: `data-testid` on decorative thumb (empty `alt` hides role), `PlatformBadge` prop typed via `Stream['platform']` (unused import)
   - Secrets: staged leak check empty; no `.env`/key tracked
 - Deferred (once key exists): card-vs-source pass per README — title/thumbnail/channel match source page, buttons open live broadcast + source, platform badge correct
-- Commit: `30b9d97 feat: sprint 2.1 stream cards (...)` (+ this worklog entry pending)
+- Commit: `30b9d97 feat: sprint 2.1 stream cards (...)` (+ `3c54d85 docs: worklog sprint 2.1`, merge `2e8bffd`)
+
+## 2026-10-04 — Sprint 2.2 Live Freshness
+
+- Sprint: 2.2 (Goal: stale information must not look current)
+- Branch: `feat/2-2-live-freshness`
+- What: `services/freshness.py` (`fresh` ≤300s / `aging` ≤1800s / `stale` / `ended`, env thresholds `FRESHNESS_*_SECONDS`, skew-clamped, adapters never set it); service stamps `Stream.freshness` on every search; `LiveStatus` shows trust note (`Fresh`, `Aging · verified 12m ago`, `Stale · not verified`; none when ended); `lib/time.ts` relative age
+- Non-goals (deferred): persistent index (4.2) and periodic revalidation (4.3) — request-time discovery re-verifies each search, so live results are fresh by construction until stored records exist; reporting (2.3)
+- Verification:
+  - Backend: `python -m pytest -q` → 35 passed (11 new simulations: fresh/boundaries/aging/stale/never-verified/ended/future-skew/custom thresholds/config defaults/service stamping); `python -m ruff check .` → clean (applied PLR1730 `max()`)
+  - Frontend: `npm run typecheck` OK; `npm run lint` clean; `npm run test` → 19 passed (time buckets, aging verified-age, ended suppresses note); `npm run build` OK; dev server → HTTP 200
+  - Live: `GET /api/search?q=storm` → `"freshness":"fresh"` stamped
+  - Secrets: staged leak check empty; no `.env`/key tracked
+- Commit: `5f63222 feat: sprint 2.2 live freshness (...)` (+ this worklog entry pending)

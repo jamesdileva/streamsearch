@@ -146,4 +146,18 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Corrections during verify: multi-token labeled query (single-token makes token-fractions binary); fixed own duplicated imports in `search.py`
   - Live: `GET /api/search?q=wildfire` → `"score":160.0` stamped
   - Secrets: staged leak check empty; no `.env`/key tracked
-- Commit: `5beee37 feat: sprint 3.1 deterministic relevance (...)` (+ this worklog entry pending)
+- Commit: `5beee37 feat: sprint 3.1 deterministic relevance (...)` (+ `1e43bfb docs: worklog sprint 3.1`, merge `213e9e0`)
+
+## 2026-10-04 — Sprint 3.2 Search Normalization
+
+- Sprint: 3.2 (Goal: small query variations produce sensible results, no AI)
+- Branch: `feat/3-2-search-normalization`
+- What: `app/search/normalize.py` (`phrase_tokens` order-preserving + `tokens` set + `normalized_text`; 13-entry `SYNONYMS`: la/nyc + 11 event plurals; ≤20 pinned); scoring uses it symmetrically (queries + fields), exact = contiguous expanded-phrase run; no stemming rules, non-ASCII dropped (multilingual = Phase 15)
+- Non-goals (deferred): location-meaning parsing (3.3); semantic retrieval (7.1)
+- Verification:
+  - Backend: `python -m pytest -q` → 63 passed (8 new pair-equivalence: case/punct/space, plurals, LA expansion, canonical form, empty, map-size guard, identical ranking, no-stemming-misfire); `python -m ruff check .` → clean
+  - Frontend untouched (no type changes): checks skipped
+  - Correction during verify: plural test exposed raw-phrase exact gap → fixed with contiguous expanded-phrase matching (all 3.1 tests still pass)
+  - Live: `?q=WILDFIRES` vs `?q=wildfire` → identical `score: 160.0` (raw `query` echo + fake-fixture title/timestamps differ by design — echo contract + per-request fixture)
+  - Secrets: staged leak check empty; no `.env`/key tracked
+- Commit: `a1421e5 feat: sprint 3.2 query normalization (...)` (+ this worklog entry pending)

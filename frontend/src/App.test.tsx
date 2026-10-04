@@ -68,6 +68,9 @@ test('normal query renders results', async () => {
   expect(rows).toHaveLength(1);
   expect(rows[0]).toHaveTextContent('[live] Skeleton live: wildfire');
   expect(rows[0]).toHaveTextContent('Skeleton Channel · fake');
+  expect(screen.getByTestId('search-count')).toHaveTextContent(
+    'Found 1 live stream',
+  );
 });
 
 test('long query passes through to the API', async () => {

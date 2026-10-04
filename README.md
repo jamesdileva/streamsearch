@@ -12,16 +12,18 @@
 
 ## Status
 
-Sprint 1.2 done — YouTube adapter (`search.list` live + `videos.list` details → normalized `Stream`, key-gated via `YOUTUBE_API_KEY`). Live-query verification **deferred** until a key exists (no-key installs keep serving the fake placeholder). To smoke-test once you have a key:
+Sprint 1.3 done — full chain proven end-to-end (`SearchBar` → API client → FastAPI → service → adapter → normalized `Stream` → rows; adapter failures → 502 envelope). Source-truth half of the 5-query check (titles/thumbnails/links vs. youtube.com) is **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
 
 ```powershell
 # backend/.env: YOUTUBE_API_KEY=<key> (never commit it)
 python -m uvicorn app.main:app --reload
 # then: GET /api/search?q=wildfire  → platform "youtube" records,
 # each verifiably live (has actualStartTime). Try: news, wildfire, storm, gaming, concert.
+# Confirm per query: results appear, titles/thumbnails match source,
+# links open the live broadcast, platform identified, no raw API fields in UI.
 ```
 
-See `docs/sprint-roadmap.md` (next: 1.3 real search results).
+See `docs/sprint-roadmap.md` (next: 2.1 stream cards).
 
 ## Target stack
 

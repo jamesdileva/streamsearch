@@ -12,6 +12,7 @@ class Settings:
     app_env: str = os.getenv("APP_ENV", "development")
     database_url: str = os.getenv("DATABASE_URL", "sqlite:///./streamsearch.db")
     youtube_api_key: str = os.getenv("YOUTUBE_API_KEY", "")
+    youtube_max_results: int = int(os.getenv("YOUTUBE_MAX_RESULTS", "10"))
     cors_origins: list[str] = _cors_origins()
 
 

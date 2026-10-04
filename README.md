@@ -12,7 +12,16 @@
 
 ## Status
 
-Sprint 1.1 done — search interface (`SearchBar` + results with loading/empty/error/idle states, responsive layout) against the fake-adapter placeholder. See `docs/sprint-roadmap.md` (next: 1.2 YouTube adapter).
+Sprint 1.2 done — YouTube adapter (`search.list` live + `videos.list` details → normalized `Stream`, key-gated via `YOUTUBE_API_KEY`). Live-query verification **deferred** until a key exists (no-key installs keep serving the fake placeholder). To smoke-test once you have a key:
+
+```powershell
+# backend/.env: YOUTUBE_API_KEY=<key> (never commit it)
+python -m uvicorn app.main:app --reload
+# then: GET /api/search?q=wildfire  → platform "youtube" records,
+# each verifiably live (has actualStartTime). Try: news, wildfire, storm, gaming, concert.
+```
+
+See `docs/sprint-roadmap.md` (next: 1.3 real search results).
 
 ## Target stack
 

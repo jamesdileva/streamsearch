@@ -20,6 +20,17 @@ class BasePlatformAdapter(ABC):
         raise NotImplementedError
 
 
+class AdapterError(Exception):
+    """Controlled adapter failure (timeout, quota, malformed, auth).
+
+    Never carries secrets — safe to surface the message to logs/API errors.
+    """
+
+
+class AdapterConfigError(AdapterError):
+    """Adapter is misconfigured (e.g. missing API key)."""
+
+
 class FakeAdapter(BasePlatformAdapter):
     """Fixture adapter proving the normalization boundary.
 

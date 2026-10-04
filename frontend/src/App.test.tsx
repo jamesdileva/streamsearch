@@ -12,8 +12,14 @@ const STREAM: Stream = {
   channel_name: 'Skeleton Channel',
   title: 'Skeleton live: wildfire',
   description: 'fixture',
+  thumbnail_url: '',
   source_url: 'https://example.com/watch/fake-1',
+  embed_url: null,
+  embed_supported: false,
   live_status: 'live',
+  started_at: null,
+  viewer_count: null,
+  location_text: null,
 };
 
 function submitQuery(value: string) {
@@ -66,11 +72,11 @@ test('normal query renders results', async () => {
   submitQuery('wildfire');
   const rows = await screen.findAllByTestId('search-result');
   expect(rows).toHaveLength(1);
-  expect(rows[0]).toHaveTextContent('[live] Skeleton live: wildfire');
-  expect(rows[0]).toHaveTextContent('Skeleton Channel · fake');
-  expect(screen.getByTestId('search-count')).toHaveTextContent(
-    'Found 1 live stream',
-  );
+  expect(rows[0]).toHaveTextContent('Skeleton live: wildfire');
+  expect(rows[0]).toHaveTextContent('Skeleton Channel');
+  expect(
+    screen.getByTestId('search-count'),
+  ).toHaveTextContent('Found 1 live stream');
 });
 
 test('long query passes through to the API', async () => {

@@ -160,12 +160,100 @@ code {
   display: grid;
   gap: 12px;
   text-align: left;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-.result-row {
+.results-list > li {
+  min-width: 0;
+}
+
+/* Sprint 2.1 stream cards: restrained, responsive grid. */
+.stream-card {
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg);
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.stream-thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--code-bg);
+}
+
+.stream-thumb--empty {
+  min-height: 0;
+}
+
+.stream-body {
   padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.stream-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-status {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.live-status--live {
+  color: #d92d20;
+}
+
+.live-status--ended,
+.live-status--unknown {
+  color: var(--text);
+}
+
+.platform-badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.stream-title {
+  font-size: 17px;
+  line-height: 130%;
+  margin: 0;
+}
+
+.stream-channel {
+  font-size: 14px;
+}
+
+.stream-meta {
+  font-size: 13px;
+}
+
+.stream-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.stream-actions a {
+  font-size: 14px;
+  padding: 8px 14px;
+  border: 1px solid var(--accent-border);
+  border-radius: 6px;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 @media (max-width: 480px) {
@@ -175,5 +263,9 @@ code {
 
   .search-bar button {
     width: 100%;
+  }
+
+  .results-list {
+    grid-template-columns: 1fr;
   }
 }

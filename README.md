@@ -12,7 +12,7 @@
 
 ## Status
 
-Sprint 1.3 done — full chain proven end-to-end (`SearchBar` → API client → FastAPI → service → adapter → normalized `Stream` → rows; adapter failures → 502 envelope). Source-truth half of the 5-query check (titles/thumbnails/links vs. youtube.com) is **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
+Sprint 2.1 done — stream cards (`StreamCard` + `LiveStatus` + `PlatformBadge`: live badge, title, channel, platform, 16:9 thumbnail, start time, viewers/location where available, Watch/Open-Source buttons) in a responsive grid. Card-vs-source comparison **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
 
 ```powershell
 # backend/.env: YOUTUBE_API_KEY=<key> (never commit it)
@@ -23,7 +23,7 @@ python -m uvicorn app.main:app --reload
 # links open the live broadcast, platform identified, no raw API fields in UI.
 ```
 
-See `docs/sprint-roadmap.md` (next: 2.1 stream cards).
+See `docs/sprint-roadmap.md` (next: 2.2 live freshness).
 
 ## Target stack
 

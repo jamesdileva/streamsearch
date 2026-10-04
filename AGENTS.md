@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 1.3 done — full search chain proven end-to-end (fake adapter until key); `AdapterError` → 502 envelope; response keys ⊆ `Stream` fields (no raw leak); 5-query sweep automated. Source-truth checks deferred until `YOUTUBE_API_KEY` exists (procedure in README/worklog). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 2.1 done — `StreamCard` + `LiveStatus` + `PlatformBadge` in responsive grid (all fields from normalized `Stream`, unavailable fields omitted); card-vs-source comparison deferred until `YOUTUBE_API_KEY` exists (procedure in README/worklog). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

@@ -92,4 +92,18 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Live: no-key smoke `GET /api/search?q=gaming` → fake fixture; chain SearchBar→rows intact
   - Secrets: staged leak check empty; no `.env`/key tracked
 - Deferred (once key exists): 5-query source-truth pass per README procedure — results appear, titles/thumbnails match source, links open live broadcasts, platform identified, no raw API fields in UI
-- Commit: `c963b61 feat: sprint 1.3 real search chain (...)` (+ this worklog entry pending)
+- Commit: `c963b61 feat: sprint 1.3 real search chain (...)` (+ `1e2f385 docs: worklog sprint 1.3`, merge `1d96658`)
+
+## 2026-10-04 — Sprint 2.1 Stream Cards
+
+- Sprint: 2.1 (Goal: results useful without opening first; still no key, so source comparison deferred)
+- Branch: `feat/2-1-stream-cards`
+- What: `StreamCard` (live badge, title, channel, platform, 16:9 thumbnail w/ empty placeholder, start `<time>`, viewers/location rows, Watch/Open-Source buttons; every optional field omitted when unavailable) + `LiveStatus` + `PlatformBadge`; `ResultsList` renders cards; full `Stream` type mirror; responsive auto-fill grid (1 col ≤480px)
+- Non-goals (deferred): card-vs-source comparison until key; freshness states (2.2); reporting (2.3)
+- Verification:
+  - Frontend: `npm run typecheck` OK; `npm run lint` (oxlint) clean; `npm run test` → 16 passed (full/minimal/ended card matrix + updated flow tests); `npm run build` OK; dev server → HTTP 200
+  - Backend (untouched): `python -m pytest -q` → 24 passed regression
+  - Fixes during verify: `data-testid` on decorative thumb (empty `alt` hides role), `PlatformBadge` prop typed via `Stream['platform']` (unused import)
+  - Secrets: staged leak check empty; no `.env`/key tracked
+- Deferred (once key exists): card-vs-source pass per README — title/thumbnail/channel match source page, buttons open live broadcast + source, platform badge correct
+- Commit: `30b9d97 feat: sprint 2.1 stream cards (...)` (+ this worklog entry pending)

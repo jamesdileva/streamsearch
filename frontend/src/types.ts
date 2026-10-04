@@ -3,7 +3,9 @@ export interface HealthResponse {
   env: string;
 }
 
-// Normalized stream (mirrors backend Stream model; card-relevant subset).
+// Normalized stream (mirrors backend Stream model; UI-relevant subset).
+export type Freshness = 'fresh' | 'aging' | 'stale' | 'ended';
+
 export interface Stream {
   id: string;
   platform: string;
@@ -17,7 +19,9 @@ export interface Stream {
   embed_url: string | null;
   embed_supported: boolean;
   live_status: 'live' | 'ended' | 'unknown';
+  freshness: Freshness | null;
   started_at: string | null;
+  last_verified_at: string | null;
   viewer_count: number | null;
   location_text: string | null;
 }

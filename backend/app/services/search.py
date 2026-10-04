@@ -12,6 +12,7 @@ from app.adapters.base import BasePlatformAdapter, FakeAdapter
 from app.adapters.youtube import YouTubeAdapter
 from app.config import settings
 from app.models.stream import SearchResponse, Stream
+from app.services.freshness import freshness_of
 
 
 def build_default_adapters() -> list[BasePlatformAdapter]:
@@ -34,7 +35,13 @@ class SearchService:
         results: list[Stream] = []
         for adapter in self.adapters:
             for raw in adapter.search(normalized):
-                results.append(Stream(**raw))
+                stream = Stream(**raw)
+                stream.freshness = freshness_of(
+                    stream,
+                    fresh_seconds=settings.freshness_fresh_seconds,
+                    aging_seconds=settings.freshness_aging_seconds,
+                )
+                results.append(stream)
         return SearchResponse(query=normalized, results=results, count=len(results))
 
 

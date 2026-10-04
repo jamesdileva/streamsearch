@@ -17,7 +17,9 @@ const STREAM: Stream = {
   embed_url: null,
   embed_supported: false,
   live_status: 'live',
+  freshness: 'fresh',
   started_at: null,
+  last_verified_at: new Date().toISOString(),
   viewer_count: null,
   location_text: null,
 };

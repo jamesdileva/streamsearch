@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 2.1 done — `StreamCard` + `LiveStatus` + `PlatformBadge` in responsive grid (all fields from normalized `Stream`, unavailable fields omitted); card-vs-source comparison deferred until `YOUTUBE_API_KEY` exists (procedure in README/worklog). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 2.2 done — freshness trust labels (`fresh`/`aging`/`stale`/`ended`, env-configured thresholds) stamped by the service and shown on cards with verified-age; simulations pinned in `tests/test_freshness.py`; revalidation machinery waits for the index (4.2/4.3). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

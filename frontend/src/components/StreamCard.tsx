@@ -45,7 +45,11 @@ export default function StreamCard({ stream }: { stream: Stream }) {
       )}
       <div className="stream-body">
         <div className="stream-top">
-          <LiveStatus status={stream.live_status} />
+          <LiveStatus
+            status={stream.live_status}
+            freshness={stream.freshness}
+            verifiedAt={stream.last_verified_at}
+          />
           <PlatformBadge platform={stream.platform} />
         </div>
         <h3 className="stream-title">

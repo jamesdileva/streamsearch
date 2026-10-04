@@ -16,7 +16,9 @@ const FULL: Stream = {
   embed_url: 'https://www.youtube.com/embed/abc',
   embed_supported: true,
   live_status: 'live',
+  freshness: 'fresh',
   started_at: '2026-10-04T00:00:00Z',
+  last_verified_at: new Date().toISOString(),
   viewer_count: 1234,
   location_text: 'Florida',
 };
@@ -34,7 +36,9 @@ const MINIMAL: Stream = {
   embed_url: null,
   embed_supported: false,
   live_status: 'unknown',
+  freshness: 'stale',
   started_at: null,
+  last_verified_at: null,
   viewer_count: null,
   location_text: null,
 };
@@ -44,6 +48,9 @@ test('full record shows every card element', () => {
   const card = screen.getByTestId('stream-card');
 
   expect(within(card).getByTestId('live-status')).toHaveTextContent('LIVE');
+  expect(within(card).getByTestId('live-freshness')).toHaveTextContent(
+    'Fresh',
+  );
   expect(within(card).getByTestId('platform-badge')).toHaveTextContent(
     'youtube',
   );
@@ -79,6 +86,9 @@ test('minimal record omits everything unavailable', () => {
   const card = screen.getByTestId('stream-card');
 
   expect(within(card).getByTestId('live-status')).toHaveTextContent('Unknown');
+  expect(within(card).getByTestId('live-freshness')).toHaveTextContent(
+    'Stale · not verified',
+  );
   expect(
     within(card).getByTestId('stream-thumb-empty'),
   ).toBeInTheDocument();
@@ -94,4 +104,19 @@ test('ended record shows ended status without live styling', () => {
   const badge = screen.getByTestId('live-status');
   expect(badge).toHaveTextContent('Ended');
   expect(badge).toHaveClass('live-status--ended');
+  expect(
+    within(screen.getByTestId('stream-card')).queryByTestId('live-freshness'),
+  ).not.toBeInTheDocument();
+});
+
+test('aging record shows verified age', () => {
+  const twelveMinAgo = new Date(Date.now() - 12 * 60_000).toISOString();
+  render(
+    <StreamCard
+      stream={{ ...FULL, freshness: 'aging', last_verified_at: twelveMinAgo }}
+    />,
+  );
+  expect(screen.getByTestId('live-freshness')).toHaveTextContent(
+    'Aging · verified 12m ago',
+  );
 });

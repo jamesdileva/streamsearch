@@ -10,6 +10,10 @@ from pydantic import BaseModel, Field
 
 LiveStatus = Literal["live", "ended", "unknown"]
 
+# How much the live flag can be trusted (computed by the service layer,
+# never set by adapters). See services/freshness.py for thresholds.
+Freshness = Literal["fresh", "aging", "stale", "ended"]
+
 
 class Stream(BaseModel):
     id: str
@@ -24,6 +28,7 @@ class Stream(BaseModel):
     embed_url: str | None = None
     embed_supported: bool = False
     live_status: LiveStatus = "unknown"
+    freshness: Freshness | None = None
     started_at: datetime | None = None
     discovered_at: datetime | None = None
     last_verified_at: datetime | None = None

@@ -39,6 +39,9 @@ class Stream(BaseModel):
     longitude: float | None = None
     location_text: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+    # Query-relative enrichment stamped by the service layer (Sprint 3.1).
+    # None until ranked; not set by adapters.
+    score: float | None = None
 
 
 class SearchResponse(BaseModel):

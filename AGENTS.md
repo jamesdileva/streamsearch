@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 2.3 done — reports end-to-end (`ReportButton` per card → `POST /api/reports` → SQLite table, `GET /api/reports` list/filter); full abuse controls wait for 11.2 (only 500-char detail cap today). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 3.1 done — deterministic scoring isolated in `app/search/scoring.py` (`Weights` dataclass, `score_stream` + `rank_streams`; title/location high, desc/tags/freshness medium, viewers log-scaled tiebreak, ended last); `Stream.score` stamped per result, order-only in UI. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

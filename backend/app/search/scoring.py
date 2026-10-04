@@ -1,12 +1,14 @@
-"""Deterministic relevance scoring (Sprint 3.1).
+"""Deterministic relevance scoring (Sprint 3.1, normalization in 3.2).
 
 Isolated, configurable scoring over stored fields — the ONLY place ranking
-weights live. Viewer count is deliberately a weak tiebreak signal, never
-primary. Ended broadcasts always sort below live ones (live-first).
+weights live. Tokenization/normalization lives in normalize.py and applies
+symmetrically to queries and fields. Viewer count is deliberately a weak
+tiebreak signal, never primary. Ended broadcasts always sort below live
+ones (live-first).
 
 Signal weights (conceptual: title/location high, description/tags medium,
 freshness medium, viewers low):
-- title_exact: full normalized query contained in the normalized title
+- title_exact: expanded query phrase appears as a contiguous token run in the title
 - title_token: fraction of query tokens present in the title
 - description: fraction of query tokens present in the description
 - tag_category: 1.0 if any query token hits tags/category, else 0.0
@@ -15,11 +17,11 @@ freshness medium, viewers low):
 - viewers: log-scaled into [0, 1], low weight
 """
 
-import re
 from dataclasses import dataclass
 from math import log10
 
 from app.models.stream import Stream
+from app.search.normalize import phrase_tokens, tokens
 
 _FRESHNESS_SCORE = {"fresh": 1.0, "aging": 0.5, "stale": 0.0, "ended": 0.0}
 
@@ -50,14 +52,19 @@ class ScoreBreakdown:
     viewers: float
 
 
-def _tokens(text: str) -> set[str]:
-    return set(re.findall(r"[a-z0-9]+", text.lower()))
-
-
 def _fraction(needles: set[str], haystack: set[str]) -> float:
     if not needles or not haystack:
         return 0.0
     return len(needles & haystack) / len(needles)
+
+
+def _contains(haystack: list[str], needle: list[str]) -> bool:
+    if not needle:
+        return False
+    return any(
+        haystack[i : i + len(needle)] == needle
+        for i in range(len(haystack) - len(needle) + 1)
+    )
 
 
 def score_stream(
@@ -65,20 +72,19 @@ def score_stream(
     query: str,
     weights: Weights = DEFAULT_WEIGHTS,
 ) -> ScoreBreakdown:
-    normalized = query.strip().lower()
-    q_tokens = _tokens(normalized)
+    q_phrase = phrase_tokens(query)
+    q_tokens = set(q_phrase)
     if not q_tokens:
         return ScoreBreakdown(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
-    title = (stream.title or "").lower()
-    title_exact = 1.0 if normalized in title else 0.0
-    title_token = _fraction(q_tokens, _tokens(stream.title or ""))
-    description = _fraction(q_tokens, _tokens(stream.description or ""))
+    title_exact = 1.0 if _contains(phrase_tokens(stream.title or ""), q_phrase) else 0.0
+    title_token = _fraction(q_tokens, tokens(stream.title or ""))
+    description = _fraction(q_tokens, tokens(stream.description or ""))
 
-    tag_haystack = _tokens(" ".join([*(stream.tags or []), stream.category or ""]))
+    tag_haystack = tokens(" ".join([*(stream.tags or []), stream.category or ""]))
     tag_category = 1.0 if q_tokens & tag_haystack else 0.0
 
-    loc_tokens = _tokens(stream.location_text or "")
+    loc_tokens = tokens(stream.location_text or "")
     location = _fraction(loc_tokens, q_tokens) if loc_tokens else 0.0
 
     freshness = _FRESHNESS_SCORE.get(stream.freshness or "stale", 0.0)

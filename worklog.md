@@ -201,4 +201,18 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Live: from empty DB, 1× `?q=storm` → `index_records:1, index_live:1`; smoke `.db` removed after (`*.db` ignored)
   - Note: non-isolated tests share the CWD dev DB file (gitignored); isolated suites use tmp DBs — revisit with dependency_overrides if it bites
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/key tracked
-- Commit: `dff87b9 feat: sprint 4.2 persistent stream index (...)` (+ this worklog entry pending)
+- Commit: `dff87b9 feat: sprint 4.2 persistent stream index (...)` (+ `0a51d19 docs: worklog sprint 4.2`, merge `f7b341b`)
+
+## 2026-10-05 — Sprint 4.3 Background Refresh
+
+- Sprint: 4.3 (Goal: continuous freshness without waiting for searches)
+- Branch: `feat/4-3-background-refresh`
+- What: `reverify` contract on adapters (dict=live, None=ended/gone, absent=untouched; default unsupported); `services/refresh.py` bounded pass (stalest live first, per-platform grouping, ended transitions, ended-prune, per-adapter errors recorded); `POST /api/refresh` trigger + lifespan interval loop (`REFRESH_*`, on/modest: 900s, batch 10, prune 30d); YouTube batch id-lookup (50/call); Fake stays live; query-discovery explicitly excluded (no crawler)
+- Non-goals (deferred): discovery of popular queries (unjustified without traffic); persistent refresh counters (10.3); trigger auth (10.2/11.2 — do not expose publicly)
+- Verification:
+  - Backend: `python -m pytest -q` → 98 passed (8 new: last_seen advance, gone→ended, unsupported untouched, error isolation, batch limit, prune-in-pass, trigger shape, YouTube live/gone mapping); `python -m ruff check .` → clean
+  - Frontend untouched (no contract changes): checks skipped
+  - Corrections during verify: Fake fixture id kept stable (`fake-1`) across search/reverify refactor
+  - Live: from empty DB, search → `POST /api/refresh` → `{checked:1, refreshed:1, ended:0, pruned:0, errors:[]}`; stats consistent; smoke `.db` removed after (transient lock from kill timing — retried clean)
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/key tracked
+- Commit: `cab6594 feat: sprint 4.3 background refresh (...)` (+ this worklog entry pending)

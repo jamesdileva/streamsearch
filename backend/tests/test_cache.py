@@ -128,5 +128,7 @@ def test_stats_endpoint_shape():
         "adapter_calls",
         "adapter_errors",
         "cache_size",
+        "index_records",
+        "index_live",
     }
     assert all(isinstance(v, int) for v in body.values())

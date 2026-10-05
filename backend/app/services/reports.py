@@ -1,27 +1,18 @@
 """Reports store (Sprint 2.3): SQLite persistence via stdlib only.
 
-One small table in the PoC database file — separate from the stream index
-(Sprint 4.2). Short-lived connections per call; plenty for report volume.
+One small table in the PoC database file. Short-lived connections per call;
+plenty for report volume.
 """
 
 import sqlite3
 from datetime import datetime, timezone
 
-from app.config import settings
 from app.models.report import Report, ReportCreate
-
-
-def _db_path() -> str:
-    url = settings.database_url
-    if url.startswith("sqlite:///"):
-        return url[len("sqlite:///") :]
-    if url.startswith("sqlite://"):
-        return url[len("sqlite://") :]
-    return "./streamsearch.db"
+from app.services.db import connect
 
 
 def _connect() -> sqlite3.Connection:
-    conn = sqlite3.connect(_db_path())
+    conn = connect()
     conn.execute(
         """CREATE TABLE IF NOT EXISTS reports (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

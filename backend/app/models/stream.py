@@ -44,6 +44,18 @@ class Stream(BaseModel):
     score: float | None = None
 
 
+class IndexedStream(Stream):
+    """A Stream as stored in the persistent index (Sprint 4.2).
+
+    Index bookkeeping only — never set by adapters, never part of the
+    search ranking contract.
+    """
+
+    first_seen_at: datetime | None = None
+    last_seen_at: datetime | None = None
+    ended_at: datetime | None = None
+
+
 class SearchResponse(BaseModel):
     query: str
     results: list[Stream] = Field(default_factory=list)

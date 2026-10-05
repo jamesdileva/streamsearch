@@ -187,4 +187,18 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Design call during verify: synonyms stay separate cache keys (platforms match on raw wording) — case/punct/space variants share
   - Live: 2× `?q=storm` → `{"cache_hits":1,"cache_misses":1,"adapter_calls":1,"adapter_errors":0,"cache_size":1}` — platform queried once
   - Secrets: staged leak check empty; no `.env`/key tracked
-- Commit: `9356a4d feat: sprint 4.1 short-lived result cache (...)` (+ this worklog entry pending)
+- Commit: `9356a4d feat: sprint 4.1 short-lived result cache (...)` (+ `5e4fa57 docs: worklog sprint 4.1`, merge `f191124`)
+
+## 2026-10-05 — Sprint 4.2 Persistent Stream Index
+
+- Sprint: 4.2 (Goal: from request-time discovery toward a real searchable index)
+- Branch: `feat/4-2-stream-index`
+- What: `services/index.py` (SQLite `streams`, PK `(platform, platform_stream_id)`; upsert refreshes `last_seen_at` + overwrites metadata, preserves `first_seen_at`, sets `ended_at` on live→ended, clears on re-live; `IndexedStream` adds first/last-seen + ended; `prune_ended_older_than` ended-only; shared `services/db.py` with reports refactored onto it); service upserts on cache misses (never breaks search — logged + skipped); `index_records`/`index_live` in `/api/stats`
+- Non-goals (deferred): background refresh (4.3); pruning unseen actives (needs refresh first); search-from-index (still adapter-first); Postgres (unjustified)
+- Verification:
+  - Backend: `python -m pytest -q` → 90 passed (7 new: no-dupes + first/last-seen, overwrite, ended + stable transition time, re-live clears, typed round-trip, ended-only prune, service populate without dupes); `python -m ruff check .` → clean
+  - Frontend untouched (no contract changes): checks skipped
+  - Live: from empty DB, 1× `?q=storm` → `index_records:1, index_live:1`; smoke `.db` removed after (`*.db` ignored)
+  - Note: non-isolated tests share the CWD dev DB file (gitignored); isolated suites use tmp DBs — revisit with dependency_overrides if it bites
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/key tracked
+- Commit: `dff87b9 feat: sprint 4.2 persistent stream index (...)` (+ this worklog entry pending)

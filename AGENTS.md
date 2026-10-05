@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 3.3 done — location parsing in `app/search/location.py` (near/in/suffix on expanded text, 12-place coords gazetteer ≤20, unknown stays keyword); place-directed scoring + topic/text split in service; YouTube geo params when keyed (`YOUTUBE_LOCATION_RADIUS`). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 4.1 done — short-lived cache in `app/services/cache.py` (TTL `CACHE_TTL_SECONDS`, normalized-query + adapter-set key, successes only, expired purged on access) with hit/miss/call/error counters at `GET /api/stats` (seed for 10.3). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

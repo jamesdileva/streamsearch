@@ -18,6 +18,8 @@ class Settings:
     # services/freshness.py. Periodic revalidation lands in Sprint 4.3.
     freshness_fresh_seconds: int = int(os.getenv("FRESHNESS_FRESH_SECONDS", "300"))
     freshness_aging_seconds: int = int(os.getenv("FRESHNESS_AGING_SECONDS", "1800"))
+    # Short-lived result cache (Sprint 4.1). Redis only if traffic justifies it.
+    cache_ttl_seconds: int = int(os.getenv("CACHE_TTL_SECONDS", "60"))
     cors_origins: list[str] = _cors_origins()
 
 

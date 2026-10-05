@@ -12,7 +12,7 @@
 
 ## Status
 
-Sprint 4.1 done — short-lived result cache (in-memory, 60s TTL via `CACHE_TTL_SECONDS`, keyed by normalized query + adapter set; successes only) with hit/miss/adapter-call/error counters at `GET /api/stats`. Repeated searches no longer touch the platform. Card-vs-source comparison **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
+Sprint 4.2 done — persistent stream index (SQLite `streams` table: upsert by `(platform, platform_stream_id)`, `first/last_seen_at`, `ended_at` transitions, ended-only prune; populated on every cache miss; counts at `GET /api/stats`). Card-vs-source comparison **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
 
 ```powershell
 # backend/.env: YOUTUBE_API_KEY=<key> (never commit it)
@@ -23,7 +23,7 @@ python -m uvicorn app.main:app --reload
 # links open the live broadcast, platform identified, no raw API fields in UI.
 ```
 
-See `docs/sprint-roadmap.md` (next: 4.2 persistent stream index).
+See `docs/sprint-roadmap.md` (next: 4.3 background refresh).
 
 ## Target stack
 

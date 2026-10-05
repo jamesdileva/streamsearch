@@ -10,6 +10,8 @@ Adapter selection is key-driven: the YouTube adapter is used only when
 in place (real-query verification deferred until the key exists).
 """
 
+import logging
+
 from app.adapters.base import AdapterError, BasePlatformAdapter, FakeAdapter
 from app.adapters.youtube import YouTubeAdapter
 from app.config import settings
@@ -18,6 +20,9 @@ from app.search.location import parse_location
 from app.search.scoring import Weights, rank_streams
 from app.services.cache import CacheStats, SearchCache
 from app.services.freshness import freshness_of
+from app.services.index import upsert_stream
+
+logger = logging.getLogger(__name__)
 
 
 def build_default_adapters() -> list[BasePlatformAdapter]:
@@ -77,8 +82,19 @@ class SearchService:
                 results.append(stream)
         ranked = rank_streams(results, text_query, self.weights, parsed.place)
         response = SearchResponse(query=normalized, results=ranked, count=len(ranked))
+        self._store_in_index(ranked)
         self.cache.put(key, response)
         return response
+
+    @staticmethod
+    def _store_in_index(streams: list[Stream]) -> None:
+        # The index must never break search: a failing store is logged and
+        # skipped (operational visibility lands in Sprint 10.3).
+        for stream in streams:
+            try:
+                upsert_stream(stream)
+            except Exception:
+                logger.warning("index upsert failed", exc_info=True)
 
 
 _default_service = SearchService()

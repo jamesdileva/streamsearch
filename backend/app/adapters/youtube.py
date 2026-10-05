@@ -18,6 +18,7 @@ from typing import Any
 import httpx
 
 from app.adapters.base import AdapterConfigError, AdapterError, BasePlatformAdapter
+from app.search.location import parse_location, place_coords
 
 SEARCH_URL = "https://www.googleapis.com/youtube/v3/search"
 VIDEOS_URL = "https://www.googleapis.com/youtube/v3/videos"
@@ -49,12 +50,14 @@ class YouTubeAdapter(BasePlatformAdapter):
         api_key: str = "",
         max_results: int = 10,
         client: httpx.Client | None = None,
+        location_radius: str = "100km",
     ) -> None:
         if not api_key:
             raise AdapterConfigError("YOUTUBE_API_KEY is not configured")
         self.api_key = api_key
         self.max_results = max(1, min(int(max_results), 25))
         self._client = client
+        self.location_radius = location_radius
 
     def _get(self, url: str, params: dict[str, Any]) -> dict[str, Any]:
         params = {**params, "key": self.api_key}
@@ -81,16 +84,23 @@ class YouTubeAdapter(BasePlatformAdapter):
         return body
 
     def _candidate_ids(self, query: str) -> list[str]:
-        body = self._get(
-            SEARCH_URL,
-            {
-                "part": "snippet",
-                "eventType": "live",
-                "type": "video",
-                "q": query,
-                "maxResults": self.max_results,
-            },
-        )
+        params: dict[str, Any] = {
+            "part": "snippet",
+            "eventType": "live",
+            "type": "video",
+            "q": query,
+            "maxResults": self.max_results,
+        }
+        # Platform geographic search where supported: known places carry
+        # coordinates, so no external geocoding is needed. Unknown places
+        # simply skip the geo bias (keyword matching still applies).
+        parsed = parse_location(query)
+        if parsed.place:
+            coords = place_coords(parsed.place)
+            if coords:
+                params["location"] = f"{coords[0]},{coords[1]}"
+                params["locationRadius"] = self.location_radius
+        body = self._get(SEARCH_URL, params)
         ids: list[str] = []
         items = body.get("items")
         if not isinstance(items, list):

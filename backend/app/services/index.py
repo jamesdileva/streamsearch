@@ -133,20 +133,21 @@ def get_stream(
 
 
 def list_streams(
-    live_status: str | None = None, limit: int = 100
+    live_status: str | None = None, limit: int = 100, oldest_first: bool = False
 ) -> list[IndexedStream]:
+    order = "ASC" if oldest_first else "DESC"
     with connect() as conn:
         _ensure_table(conn)
         if live_status:
             rows = conn.execute(
                 f"SELECT {_COLUMNS} FROM streams WHERE live_status = ?"
-                " ORDER BY last_seen_at DESC LIMIT ?",
+                f" ORDER BY last_seen_at {order} LIMIT ?",
                 (live_status, limit),
             ).fetchall()
         else:
             rows = conn.execute(
                 f"SELECT {_COLUMNS} FROM streams"
-                " ORDER BY last_seen_at DESC LIMIT ?",
+                f" ORDER BY last_seen_at {order} LIMIT ?",
                 (limit,),
             ).fetchall()
         return [_row_to_indexed(r) for r in rows]

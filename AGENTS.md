@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 4.2 done — persistent index in `app/services/index.py` (upsert, first/last-seen, ended transitions, ended-only prune; shared `services/db.py`; populated on cache misses, never breaks search; counts in `/api/stats`). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 4.3 done — bounded refresh in `app/services/refresh.py` (`reverify` contract: dict=live, None=ended, absent=untouched; `POST /api/refresh` + `REFRESH_*` interval loop, default on/modest; no discovery crawler). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

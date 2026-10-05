@@ -173,4 +173,18 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Frontend untouched (no type changes): checks skipped
   - Live: `?q=wildfire near Los Angeles` + `?q=storm near nowhereville` → 200, ranked, scored (fake has no `location_text`, differentiation proven in tests)
   - Secrets: staged leak check empty; no `.env`/key tracked
-- Commit: `a21541b feat: sprint 3.3 location-aware search (...)` (+ this worklog entry pending)
+- Commit: `a21541b feat: sprint 3.3 location-aware search (...)` (+ `285de4e docs: worklog sprint 3.3`, merge `0de2192`)
+
+## 2026-10-05 — Sprint 4.1 Search Result Caching
+
+- Sprint: 4.1 (Goal: repeated searches are cheap and fast; protect quotas)
+- Branch: `feat/4-1-result-caching`
+- What: `services/cache.py` (in-memory TTL cache keyed by normalized query + adapter set, expired purged on access, successes only) + `CacheStats` (hits/misses/adapter calls/errors); service serves repeats from cache; `GET /api/stats` exposes counters (seed for 10.3); `CACHE_TTL_SECONDS` (default 60)
+- Non-goals (deferred): persistent index (4.2); background refresh (4.3); Redis (needs traffic justification); failure caching (errors stay visible/retryable)
+- Verification:
+  - Backend: `python -m pytest -q` → 83 passed (8 new: repeat=1 call, raw-variant sharing, distinct queries, zero-TTL, failures uncached + error counts, key mixing, purge-on-write, stats shape); `python -m ruff check .` → clean (fixed import sort)
+  - Frontend untouched (no type/contract changes): checks skipped
+  - Design call during verify: synonyms stay separate cache keys (platforms match on raw wording) — case/punct/space variants share
+  - Live: 2× `?q=storm` → `{"cache_hits":1,"cache_misses":1,"adapter_calls":1,"adapter_errors":0,"cache_size":1}` — platform queried once
+  - Secrets: staged leak check empty; no `.env`/key tracked
+- Commit: `9356a4d feat: sprint 4.1 short-lived result cache (...)` (+ this worklog entry pending)

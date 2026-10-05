@@ -204,3 +204,15 @@ def test_youtube_raw_records_contain_only_normalized_fields():
     for raw in records:
         assert set(raw) <= set(Stream.model_fields)
         Stream(**raw)
+
+
+def test_reverify_confirms_live_and_gone():
+    adapter = YouTubeAdapter(api_key="k", client=_ok_client())
+    verdicts = adapter.reverify(["vid-live", "vid-upcoming", "vid-gone"])
+    assert set(verdicts) == {"vid-live", "vid-upcoming", "vid-gone"}
+    live = verdicts["vid-live"]
+    assert live is not None
+    assert live["platform_stream_id"] == "vid-live"
+    assert live["live_status"] == "live"
+    assert verdicts["vid-upcoming"] is None  # present but not live
+    assert verdicts["vid-gone"] is None  # absent from platform response

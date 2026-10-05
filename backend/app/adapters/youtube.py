@@ -172,3 +172,18 @@ class YouTubeAdapter(BasePlatformAdapter):
             for item in self._details(ids)
             if (mapped := self._map(item)) is not None
         ]
+
+    def reverify(
+        self, platform_stream_ids: list[str]
+    ) -> dict[str, dict[str, Any] | None]:
+        """Batch id lookup (50 per call); missing or unmappable → None (ended)."""
+        found: dict[str, dict[str, Any] | None] = {}
+        for start in range(0, len(platform_stream_ids), 50):
+            chunk = platform_stream_ids[start : start + 50]
+            if not chunk:
+                continue
+            for item in self._details(chunk):
+                video_id = str(item.get("id", ""))
+                if video_id:
+                    found[video_id] = self._map(item)
+        return {vid: found.get(vid) for vid in platform_stream_ids}

@@ -20,6 +20,11 @@ class Settings:
     freshness_aging_seconds: int = int(os.getenv("FRESHNESS_AGING_SECONDS", "1800"))
     # Short-lived result cache (Sprint 4.1). Redis only if traffic justifies it.
     cache_ttl_seconds: int = int(os.getenv("CACHE_TTL_SECONDS", "60"))
+    # Background refresh (Sprint 4.3): bounded, modest by default.
+    refresh_enabled: bool = os.getenv("REFRESH_ENABLED", "1") == "1"
+    refresh_interval_seconds: int = int(os.getenv("REFRESH_INTERVAL_SECONDS", "900"))
+    refresh_batch_size: int = int(os.getenv("REFRESH_BATCH_SIZE", "10"))
+    refresh_prune_days: int = int(os.getenv("REFRESH_PRUNE_DAYS", "30"))
     cors_origins: list[str] = _cors_origins()
 
 

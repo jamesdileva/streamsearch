@@ -160,4 +160,17 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Correction during verify: plural test exposed raw-phrase exact gap → fixed with contiguous expanded-phrase matching (all 3.1 tests still pass)
   - Live: `?q=WILDFIRES` vs `?q=wildfire` → identical `score: 160.0` (raw `query` echo + fake-fixture title/timestamps differ by design — echo contract + per-request fixture)
   - Secrets: staged leak check empty; no `.env`/key tracked
-- Commit: `a1421e5 feat: sprint 3.2 query normalization (...)` (+ this worklog entry pending)
+- Commit: `a1421e5 feat: sprint 3.2 query normalization (...)` (+ `9b4bac3 docs: worklog sprint 3.2`, merge `f69e28a`)
+
+## 2026-10-05 — Sprint 3.3 Location-Aware Search
+
+- Sprint: 3.3 (Goal: location becomes a useful search dimension, not decoration)
+- Branch: `feat/3-3-location-search`
+- What: `app/search/location.py` (near/in/suffix parsing on synonym-expanded text; 12-place gazetteer with coords, ≤20 pinned; unknown places stay keyword with `place_attempt` exposed); place-directed scoring (coverage of requested place; legacy query-overlap when no place); service splits topic/place for ranking while adapters get the full query; YouTube `location`/`locationRadius` geo bias when keyed (`YOUTUBE_LOCATION_RADIUS`, default 100km)
+- Non-goals (deferred): hierarchical geo (city-in-state matching); map UI (8.2 experiment); semantic retrieval (7.1)
+- Verification:
+  - Backend: `python -m pytest -q` → 75 passed (12 new matrix: near/in/suffix, case/punct/synonyms, unknown, none, bare-place, gazetteer guard+coords, place outranking, no-match stability, service end-to-end, YouTube geo present/absent); `python -m ruff check .` → clean
+  - Frontend untouched (no type changes): checks skipped
+  - Live: `?q=wildfire near Los Angeles` + `?q=storm near nowhereville` → 200, ranked, scored (fake has no `location_text`, differentiation proven in tests)
+  - Secrets: staged leak check empty; no `.env`/key tracked
+- Commit: `a21541b feat: sprint 3.3 location-aware search (...)` (+ this worklog entry pending)

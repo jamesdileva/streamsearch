@@ -13,6 +13,7 @@ from app.adapters.base import BasePlatformAdapter, FakeAdapter
 from app.adapters.youtube import YouTubeAdapter
 from app.config import settings
 from app.models.stream import SearchResponse, Stream
+from app.search.location import parse_location
 from app.search.scoring import Weights, rank_streams
 from app.services.freshness import freshness_of
 
@@ -23,6 +24,7 @@ def build_default_adapters() -> list[BasePlatformAdapter]:
             YouTubeAdapter(
                 api_key=settings.youtube_api_key,
                 max_results=settings.youtube_max_results,
+                location_radius=settings.youtube_location_radius,
             )
         ]
     return [FakeAdapter()]
@@ -39,6 +41,11 @@ class SearchService:
 
     def search(self, query: str) -> SearchResponse:
         normalized = query.strip()
+        # Adapters receive the full query (platforms do their own matching);
+        # ranking uses the parsed topic + place so location words don't
+        # dilute text signals. Empty topic falls back to the full query.
+        parsed = parse_location(normalized)
+        text_query = parsed.topic or normalized
         results: list[Stream] = []
         for adapter in self.adapters:
             for raw in adapter.search(normalized):
@@ -49,7 +56,7 @@ class SearchService:
                     aging_seconds=settings.freshness_aging_seconds,
                 )
                 results.append(stream)
-        ranked = rank_streams(results, normalized, self.weights)
+        ranked = rank_streams(results, text_query, self.weights, parsed.place)
         return SearchResponse(query=normalized, results=ranked, count=len(ranked))
 
 

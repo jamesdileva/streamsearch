@@ -12,7 +12,8 @@ freshness medium, viewers low):
 - title_token: fraction of query tokens present in the title
 - description: fraction of query tokens present in the description
 - tag_category: 1.0 if any query token hits tags/category, else 0.0
-- location: fraction of location_text tokens present in the query
+- location: with a parsed place, how much of it the record covers;
+  otherwise fraction of location_text tokens present in the query
 - freshness: fresh 1.0 / aging 0.5 / stale or ended 0.0
 - viewers: log-scaled into [0, 1], low weight
 """
@@ -71,6 +72,7 @@ def score_stream(
     stream: Stream,
     query: str,
     weights: Weights = DEFAULT_WEIGHTS,
+    place: str | None = None,
 ) -> ScoreBreakdown:
     q_phrase = phrase_tokens(query)
     q_tokens = set(q_phrase)
@@ -85,7 +87,14 @@ def score_stream(
     tag_category = 1.0 if q_tokens & tag_haystack else 0.0
 
     loc_tokens = tokens(stream.location_text or "")
-    location = _fraction(loc_tokens, q_tokens) if loc_tokens else 0.0
+    if place:
+        # How much of the requested place does this record cover?
+        place_tokens = tokens(place)
+        location = _fraction(place_tokens, loc_tokens) if place_tokens else 0.0
+    elif loc_tokens:
+        location = _fraction(loc_tokens, q_tokens)
+    else:
+        location = 0.0
 
     freshness = _FRESHNESS_SCORE.get(stream.freshness or "stale", 0.0)
 
@@ -108,12 +117,13 @@ def rank_streams(
     streams: list[Stream],
     query: str,
     weights: Weights = DEFAULT_WEIGHTS,
+    place: str | None = None,
 ) -> list[Stream]:
     """Score, stamp, and order: live records by score desc, ended last.
 
     Python's sort is stable, so score ties keep adapter discovery order.
     """
-    scored = [(s, score_stream(s, query, weights)) for s in streams]
+    scored = [(s, score_stream(s, query, weights, place)) for s in streams]
     scored.sort(key=lambda t: (t[0].live_status != "ended", t[1].total), reverse=True)
     for stream, breakdown in scored:
         stream.score = round(breakdown.total, 3)

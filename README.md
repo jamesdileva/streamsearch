@@ -12,7 +12,7 @@
 
 ## Status
 
-Sprint 3.2 done — query normalization without AI (`app/search/normalize.py`: casing/punctuation/whitespace + 13-entry explicit synonym map incl. `LA→Los Angeles` and event plurals, applied symmetrically to queries and fields; map size pinned ≤20). Equivalent queries score and rank identically. Card-vs-source comparison **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
+Sprint 3.3 done — location-aware search (`app/search/location.py`: `near`/`in`/suffix parsing on expanded text, 12-place gazetteer with coordinates pinned ≤20; place-directed scoring; YouTube `location`/`locationRadius` geo bias when keyed; adapters still get the full query). Unknown places stay searchable as keywords. Card-vs-source comparison **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
 
 ```powershell
 # backend/.env: YOUTUBE_API_KEY=<key> (never commit it)
@@ -23,7 +23,7 @@ python -m uvicorn app.main:app --reload
 # links open the live broadcast, platform identified, no raw API fields in UI.
 ```
 
-See `docs/sprint-roadmap.md` (next: 3.3 location-aware search).
+See `docs/sprint-roadmap.md` (next: 4.1 search result caching).
 
 ## Target stack
 

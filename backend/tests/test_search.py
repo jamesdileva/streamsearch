@@ -9,18 +9,22 @@ from app.services.search import SearchService, get_search_service
 client = TestClient(app)
 
 
-def test_search_returns_normalized_fake_stream():
+def test_search_returns_mixed_platform_streams():
+    # No key → FakeAdapter + FakeTwitchAdapter (Sprint 5.1). Ordered by
+    # score desc; every record normalized, platforms identified.
     r = client.get("/api/search", params={"q": "wildfire"})
     assert r.status_code == 200
     body = r.json()
     assert body["query"] == "wildfire"
-    assert body["count"] == 1
-    (stream,) = body["results"]
-    assert stream["platform"] == "fake"
-    assert stream["live_status"] == "live"
-    assert "wildfire" in stream["title"]
-    assert stream["channel_name"] == "Skeleton Channel"
-    assert stream["source_url"] == "https://example.com/watch/fake-1"
+    assert body["count"] == len(body["results"]) == 3
+    assert {s["platform"] for s in body["results"]} == {"fake", "twitch"}
+    scores = [s["score"] for s in body["results"]]
+    assert scores == sorted(scores, reverse=True)
+    fake = next(s for s in body["results"] if s["platform"] == "fake")
+    assert fake["live_status"] == "live"
+    assert "wildfire" in fake["title"]
+    assert fake["channel_name"] == "Skeleton Channel"
+    assert fake["source_url"] == "https://example.com/watch/fake-1"
 
 
 def test_search_empty_query_is_422_envelope():

@@ -13,6 +13,7 @@ in place (real-query verification deferred until the key exists).
 import logging
 
 from app.adapters.base import AdapterError, BasePlatformAdapter, FakeAdapter
+from app.adapters.fake_twitch import FakeTwitchAdapter
 from app.adapters.youtube import YouTubeAdapter
 from app.config import settings
 from app.models.stream import SearchResponse, Stream
@@ -34,7 +35,9 @@ def build_default_adapters() -> list[BasePlatformAdapter]:
                 location_radius=settings.youtube_location_radius,
             )
         ]
-    return [FakeAdapter()]
+    # No key: two fake platforms, proving the mixed-platform chain
+    # (Sprint 5.1). Never mixed with real adapters.
+    return [FakeAdapter(), FakeTwitchAdapter()]
 
 
 class SearchService:

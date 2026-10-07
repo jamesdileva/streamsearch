@@ -176,10 +176,11 @@ def test_max_results_clamped_to_budget():
     assert YouTubeAdapter(api_key="k", max_results=0).max_results == 1
 
 
-def test_service_factory_uses_fake_without_key(monkeypatch):
+def test_service_factory_uses_fakes_without_key(monkeypatch):
     monkeypatch.setattr(settings, "youtube_api_key", "")
-    (adapter,) = build_default_adapters()
-    assert isinstance(adapter, FakeAdapter)
+    adapters = build_default_adapters()
+    assert [a.platform for a in adapters] == ["fake", "twitch"]
+    assert isinstance(adapters[0], FakeAdapter)
 
 
 def test_service_factory_uses_youtube_with_key(monkeypatch):

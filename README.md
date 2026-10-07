@@ -12,7 +12,7 @@
 
 ## Status
 
-Sprint 4.3 done — background refresh (bounded pass over stalest-known-live records: id-reverify → upsert/ended-transition → ended-prune; `POST /api/refresh` manual trigger + opt-out interval loop `REFRESH_*`; unsupported adapters age honestly; no query-discovery crawler). Card-vs-source comparison **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
+Sprint 5.1 done — adapter contract proven platform-agnostic: a fake Twitch-shaped adapter (numeric ids, game-name categories, no location, sparse thumbnails/embeds) runs the untouched chain next to the fake adapter, with zero interface changes (no YouTube/fake assumptions found outside adapters + key-driven factory). Card-vs-source comparison **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
 
 ```powershell
 # backend/.env: YOUTUBE_API_KEY=<key> (never commit it)
@@ -23,7 +23,7 @@ python -m uvicorn app.main:app --reload
 # links open the live broadcast, platform identified, no raw API fields in UI.
 ```
 
-See `docs/sprint-roadmap.md` (next: 5.1 adapter contract review).
+See `docs/sprint-roadmap.md` (next: 5.2 Twitch discovery).
 
 ## Target stack
 

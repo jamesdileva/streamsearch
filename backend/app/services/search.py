@@ -19,7 +19,7 @@ from app.adapters.youtube import YouTubeAdapter
 from app.config import settings
 from app.models.stream import SearchResponse, Stream
 from app.search.location import parse_location
-from app.search.scoring import Weights, rank_streams
+from app.search.scoring import Weights, rank_streams, sort_streams
 from app.services.cache import CacheStats, SearchCache
 from app.services.freshness import freshness_of
 from app.services.index import upsert_stream
@@ -66,10 +66,21 @@ class SearchService:
         self.cache = cache or SearchCache(ttl_seconds=settings.cache_ttl_seconds)
         self.stats = CacheStats()
 
-    def search(self, query: str) -> SearchResponse:
+    def search(
+        self,
+        query: str,
+        platform: str = "all",
+        sort: str = "relevance",
+        has_location: bool = False,
+    ) -> SearchResponse:
         normalized = query.strip()
+        platform_filter = platform.strip().lower()
         key = SearchCache.key(
-            normalized, tuple(a.platform for a in self.adapters)
+            normalized,
+            tuple(a.platform for a in self.adapters),
+            platform_filter,
+            sort,
+            has_location,
         )
         cached = self.cache.get(key)
         if cached is not None:
@@ -97,9 +108,19 @@ class SearchService:
                     aging_seconds=settings.freshness_aging_seconds,
                 )
                 results.append(stream)
+        if platform_filter and platform_filter != "all":
+            wanted = {p.strip() for p in platform_filter.split(",") if p.strip()}
+            results = [s for s in results if s.platform in wanted]
+        if has_location:
+            results = [
+                s
+                for s in results
+                if s.location_text or (s.latitude is not None and s.longitude is not None)
+            ]
         ranked = rank_streams(results, text_query, self.weights, parsed.place)
-        response = SearchResponse(query=normalized, results=ranked, count=len(ranked))
-        self._store_in_index(ranked)
+        ordered = sort_streams(ranked, sort)
+        response = SearchResponse(query=normalized, results=ordered, count=len(ordered))
+        self._store_in_index(ordered)
         self.cache.put(key, response)
         return response
 

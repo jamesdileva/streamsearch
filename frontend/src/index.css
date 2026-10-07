@@ -281,6 +281,32 @@ code {
   align-items: center;
 }
 
+/* Sprint 5.3 filters: inline row, wraps and stacks on narrow screens. */
+.search-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  font-size: 14px;
+  margin: 4px 0 8px;
+}
+
+.search-filters label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.search-filters select {
+  font: inherit;
+  font-size: 14px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-h);
+  background: var(--bg);
+}
+
 @media (max-width: 480px) {
   .search-bar {
     flex-direction: column;

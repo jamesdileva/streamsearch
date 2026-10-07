@@ -19,6 +19,7 @@ freshness medium, viewers low):
 """
 
 from dataclasses import dataclass
+from datetime import timezone
 from math import log10
 
 from app.models.stream import Stream
@@ -128,3 +129,39 @@ def rank_streams(
     for stream, breakdown in scored:
         stream.score = round(breakdown.total, 3)
     return [s for s, _ in scored]
+
+
+SORTS = ("relevance", "newest", "viewers")
+
+
+def _started_ts(stream: Stream) -> float | None:
+    at = stream.started_at
+    if at is None:
+        return None
+    if at.tzinfo is None:
+        at = at.replace(tzinfo=timezone.utc)
+    return at.timestamp()
+
+
+def sort_streams(streams: list[Stream], sort: str) -> list[Stream]:
+    """Reorder ranked streams. Ended records stay last (live-first).
+
+    Missing values sort last; ties keep current (stable) order.
+    """
+    if sort not in SORTS:
+        raise ValueError(f"unknown sort: {sort}")
+    if sort == "relevance":
+        return list(streams)
+
+    def newest_key(s: Stream) -> tuple[bool, float | None]:
+        return (_started_ts(s) is not None, _started_ts(s))
+
+    def viewers_key(s: Stream) -> tuple[bool, int | None]:
+        return (s.viewer_count is not None, s.viewer_count)
+
+    key = newest_key if sort == "newest" else viewers_key
+    live = [s for s in streams if s.live_status != "ended"]
+    ended = [s for s in streams if s.live_status == "ended"]
+    live.sort(key=key, reverse=True)
+    ended.sort(key=key, reverse=True)
+    return live + ended

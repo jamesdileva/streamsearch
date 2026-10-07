@@ -4,6 +4,12 @@ import type {
   SearchResponse,
 } from '../types';
 
+export interface SearchOptions {
+  platform?: string;
+  sort?: string;
+  hasLocation?: boolean;
+}
+
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 export async function fetchHealth(signal?: AbortSignal): Promise<HealthResponse> {
@@ -14,12 +20,22 @@ export async function fetchHealth(signal?: AbortSignal): Promise<HealthResponse>
 
 export async function searchStreams(
   query: string,
+  opts: SearchOptions = {},
   signal?: AbortSignal,
 ): Promise<SearchResponse> {
-  const res = await fetch(
-    `${API_BASE}/api/search?q=${encodeURIComponent(query)}`,
-    { signal },
-  );
+  const params = new URLSearchParams({ q: query });
+  if (opts.platform && opts.platform !== 'all') {
+    params.set('platform', opts.platform);
+  }
+  if (opts.sort && opts.sort !== 'relevance') {
+    params.set('sort', opts.sort);
+  }
+  if (opts.hasLocation) {
+    params.set('has_location', 'true');
+  }
+  const res = await fetch(`${API_BASE}/api/search?${params.toString()}`, {
+    signal,
+  });
   if (!res.ok) throw new Error(`search failed: ${res.status}`);
   return res.json() as Promise<SearchResponse>;
 }

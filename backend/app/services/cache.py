@@ -41,8 +41,15 @@ class SearchCache:
         self._lock = threading.Lock()
 
     @staticmethod
-    def key(query: str, platforms: tuple[str, ...]) -> str:
-        return f"{'|'.join(platforms)}::{normalized_text(query)}"
+    def key(
+        query: str,
+        platforms: tuple[str, ...],
+        platform_filter: str = "all",
+        sort: str = "relevance",
+        has_location: bool = False,
+    ) -> str:
+        base = f"{'|'.join(platforms)}::{normalized_text(query)}"
+        return f"{base}::p={platform_filter}::s={sort}::loc={int(has_location)}"
 
     def _purge_expired(self, now: float) -> None:
         expired = [k for k, (_, exp) in self._entries.items() if exp <= now]

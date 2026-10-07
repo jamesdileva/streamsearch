@@ -12,18 +12,23 @@
 
 ## Status
 
-Sprint 5.1 done — adapter contract proven platform-agnostic: a fake Twitch-shaped adapter (numeric ids, game-name categories, no location, sparse thumbnails/embeds) runs the untouched chain next to the fake adapter, with zero interface changes (no YouTube/fake assumptions found outside adapters + key-driven factory). Card-vs-source comparison **deferred** until `YOUTUBE_API_KEY` exists — procedure below stays valid. To smoke-test once you have a key:
+Sprint 5.2 done — real Twitch adapter (Helix `search/categories` → `streams`, channel-stable ids, game categories, substituted thumbnails, 401-refreshing token cache, channel reverify; keyed by `TWITCH_CLIENT_ID/SECRET`, never mixed with fakes). Dual-platform live verification **deferred** until both credentials exist. To smoke-test once you have them:
 
 ```powershell
-# backend/.env: YOUTUBE_API_KEY=<key> (never commit it)
+# backend/.env (never commit it):
+# YOUTUBE_API_KEY=<key>
+# TWITCH_CLIENT_ID=<id>
+# TWITCH_CLIENT_SECRET=<secret>
+# TWITCH_EMBED_PARENT=localhost  # production: your frontend host
 python -m uvicorn app.main:app --reload
-# then: GET /api/search?q=wildfire  → platform "youtube" records,
-# each verifiably live (has actualStartTime). Try: news, wildfire, storm, gaming, concert.
-# Confirm per query: results appear, titles/thumbnails match source,
-# links open the live broadcast, platform identified, no raw API fields in UI.
+# then: GET /api/search?q=wildfire  → platform "youtube" + "twitch" records
+# in one ranked set. Try topics with both-platform coverage (news, gaming,
+# concert). Confirm per query: results appear, titles/thumbnails match
+# source, links open the live broadcast, platform identified, no raw API
+# fields in UI, and neither platform dominates every query.
 ```
 
-See `docs/sprint-roadmap.md` (next: 5.2 Twitch discovery).
+See `docs/sprint-roadmap.md` (next: 5.3 unified cross-platform results).
 
 ## Target stack
 

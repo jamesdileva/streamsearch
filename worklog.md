@@ -230,4 +230,18 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Frontend untouched (mocks; twitch records carry all card fields): checks skipped
   - Live: `?q=concert` → 3 records, `twitch > fake > twitch` by score (viewer bonus + stable ties), platforms identified; smoke `.db` removed after
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/key tracked
-- Commit: `585a88d feat: sprint 5.1 second fake platform (...)` (+ this worklog entry pending)
+- Commit: `585a88d feat: sprint 5.1 second fake platform (...)` (+ `ac16fc4 docs: worklog sprint 5.1`, merge `a7f43fe`)
+
+## 2026-10-07 — Sprint 5.2 Twitch Discovery (live verify deferred)
+
+- Sprint: 5.2 (Goal: second real platform; no credentials, so live verification deferred)
+- Branch: `feat/5-2-twitch-discovery`
+- What: `adapters/twitch.py` (Helix `search/categories` → `streams` + top-live fallback; channel-stable `platform_stream_id` with broadcast id in metadata; game-name categories; substituted thumbnails; client-credentials token cache + single 401 retry; channel reverify ≤100/call; `TWITCH_MAX_RESULTS/CATEGORIES/EMBED_PARENT` config); factory matrix yt/twitch/both/fakes-never-mixed
+- Non-goals (deferred): dual-platform live proof until both credentials exist; unified ranking balance review (5.3); category pagination (first page only, bounded)
+- Verification:
+  - Backend: `python -m pytest -q` → 113 passed (10 new: mapping, category cap, fallback, token caching, 401 retry, reverify live/offline, config errors, 500, factory matrix, service validation); `python -m ruff check .` → clean
+  - Frontend untouched (real twitch records carry all card fields; no type changes): checks skipped; dev server → HTTP 200
+  - Live: no-cred smoke shape unchanged (fake + fake-twitch, 3 ranked); smoke `.db` removed after
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- Deferred dual-platform procedure (needs both keys): set `YOUTUBE_API_KEY` + `TWITCH_CLIENT_ID/SECRET` in `backend/.env` (+ `TWITCH_EMBED_PARENT` for production host), restart, `GET /api/search?q=` for news/gaming/concert → expect `youtube` + `twitch` records in one ranked set, each verifiably live via `source_url`; confirm neither platform dominates every query
+- Commit: `3a95837 feat: sprint 5.2 twitch discovery (...)` (+ this worklog entry pending)

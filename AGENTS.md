@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 5.1 done — `FakeTwitchAdapter` proves the contract (numeric ids, game categories, no location, sparse thumbs/embeds) with zero interface changes; no-key defaults are [fake, twitch], never mixed with real; review found no platform assumptions outside adapters + factory. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 5.2 done — `TwitchAdapter` (Helix categories→streams, channel-stable ids, token cache + 401 retry, channel reverify) keyed by `TWITCH_CLIENT_ID/SECRET`; factory matrix yt/twitch/both/fakes, fakes never mixed with real; dual-platform live verification deferred until both credentials exist. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

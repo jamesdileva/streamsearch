@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 4.3 done — bounded refresh in `app/services/refresh.py` (`reverify` contract: dict=live, None=ended, absent=untouched; `POST /api/refresh` + `REFRESH_*` interval loop, default on/modest; no discovery crawler). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 5.1 done — `FakeTwitchAdapter` proves the contract (numeric ids, game categories, no location, sparse thumbs/embeds) with zero interface changes; no-key defaults are [fake, twitch], never mixed with real; review found no platform assumptions outside adapters + factory. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

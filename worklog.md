@@ -215,4 +215,19 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Corrections during verify: Fake fixture id kept stable (`fake-1`) across search/reverify refactor
   - Live: from empty DB, search → `POST /api/refresh` → `{checked:1, refreshed:1, ended:0, pruned:0, errors:[]}`; stats consistent; smoke `.db` removed after (transient lock from kill timing — retried clean)
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/key tracked
-- Commit: `cab6594 feat: sprint 4.3 background refresh (...)` (+ this worklog entry pending)
+- Commit: `cab6594 feat: sprint 4.3 background refresh (...)` (+ `d0c13d1 docs: worklog sprint 4.3`, merge `b6201d8`)
+
+## 2026-10-07 — Sprint 5.1 Adapter Contract Review
+
+- Sprint: 5.1 (Goal: prove the architecture supports a second platform)
+- Branch: `feat/5-1-adapter-contract-review`
+- What: `adapters/fake_twitch.py` (`FakeTwitchAdapter`: numeric ids, game-name categories, zero location, missing thumb + no-embed record, int-or-absent viewers, live/nothing states; retired `555` for refresh-ending); no-key defaults now `[FakeAdapter, FakeTwitchAdapter]` (never mixed with real); zero interface changes
+- Assumption review (grep): `app/search` has no platform refs; `app/api` + `app/models` none; `services` only the key-driven factory; frontend only opaque platform strings in fixtures (badge renders whatever arrives) — no platform parsing in UI
+- Non-goals (deferred): real Twitch adapter (5.2); unifying fake adapters (kept separate: skeleton vs Twitch-shaped)
+- Verification:
+  - Backend: `python -m pytest -q` → 103 passed (5 new: differing-shape validation, mixed ranking, reverify judgements, mixed refresh endings, factory never mixes fake+real); `python -m ruff check .` → clean
+  - Updated 2 tests for the new default reality (mixed search shape, `[fake, twitch]` factory); all other suites unaffected
+  - Frontend untouched (mocks; twitch records carry all card fields): checks skipped
+  - Live: `?q=concert` → 3 records, `twitch > fake > twitch` by score (viewer bonus + stable ties), platforms identified; smoke `.db` removed after
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/key tracked
+- Commit: `585a88d feat: sprint 5.1 second fake platform (...)` (+ this worklog entry pending)

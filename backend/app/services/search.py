@@ -5,15 +5,16 @@ stamps freshness, ranks with deterministic scoring, and serves repeats
 from a short-lived cache (app/services/cache.py) to protect platform quota.
 No semantic retrieval — that waits for the Sprint 7.1 failure dataset.
 
-Adapter selection is key-driven: the YouTube adapter is used only when
-`YOUTUBE_API_KEY` is configured, otherwise the FakeAdapter skeleton stays
-in place (real-query verification deferred until the key exists).
+Adapter selection is key-driven: YouTube and Twitch adapters are used only
+when their credentials are configured (independently combinable); otherwise
+the fake platforms stay in place. Fakes are never mixed with real adapters.
 """
 
 import logging
 
 from app.adapters.base import AdapterError, BasePlatformAdapter, FakeAdapter
 from app.adapters.fake_twitch import FakeTwitchAdapter
+from app.adapters.twitch import TwitchAdapter
 from app.adapters.youtube import YouTubeAdapter
 from app.config import settings
 from app.models.stream import SearchResponse, Stream
@@ -27,15 +28,28 @@ logger = logging.getLogger(__name__)
 
 
 def build_default_adapters() -> list[BasePlatformAdapter]:
+    adapters: list[BasePlatformAdapter] = []
     if settings.youtube_api_key:
-        return [
+        adapters.append(
             YouTubeAdapter(
                 api_key=settings.youtube_api_key,
                 max_results=settings.youtube_max_results,
                 location_radius=settings.youtube_location_radius,
             )
-        ]
-    # No key: two fake platforms, proving the mixed-platform chain
+        )
+    if settings.twitch_client_id and settings.twitch_client_secret:
+        adapters.append(
+            TwitchAdapter(
+                client_id=settings.twitch_client_id,
+                client_secret=settings.twitch_client_secret,
+                max_results=settings.twitch_max_results,
+                max_categories=settings.twitch_max_categories,
+                embed_parent=settings.twitch_embed_parent,
+            )
+        )
+    if adapters:
+        return adapters
+    # No keys: two fake platforms, proving the mixed-platform chain
     # (Sprint 5.1). Never mixed with real adapters.
     return [FakeAdapter(), FakeTwitchAdapter()]
 

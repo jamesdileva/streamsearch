@@ -14,6 +14,11 @@ class Settings:
     youtube_api_key: str = os.getenv("YOUTUBE_API_KEY", "")
     youtube_max_results: int = int(os.getenv("YOUTUBE_MAX_RESULTS", "10"))
     youtube_location_radius: str = os.getenv("YOUTUBE_LOCATION_RADIUS", "100km")
+    twitch_client_id: str = os.getenv("TWITCH_CLIENT_ID", "")
+    twitch_client_secret: str = os.getenv("TWITCH_CLIENT_SECRET", "")
+    twitch_max_results: int = int(os.getenv("TWITCH_MAX_RESULTS", "10"))
+    twitch_max_categories: int = int(os.getenv("TWITCH_MAX_CATEGORIES", "3"))
+    twitch_embed_parent: str = os.getenv("TWITCH_EMBED_PARENT", "localhost")
     # Freshness thresholds (seconds since last_verified_at). See
     # services/freshness.py. Periodic revalidation lands in Sprint 4.3.
     freshness_fresh_seconds: int = int(os.getenv("FRESHNESS_FRESH_SECONDS", "300"))

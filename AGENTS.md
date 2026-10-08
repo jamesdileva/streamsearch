@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 9.1 done — Kick feasibility researched in `docs/kick-feasibility.md`: **GO** for 9.2 (official Public API — `categories?q=` text search then `livestreams?category_id=`, no scraping needed; App Access Token via client_credentials; no geo fields; 429 rate limits with unpublished numbers). Two open items for 9.2: embed parent-domain and `is_mature` policy (recommend omitting). No adapter code written yet — 9.2 needs `KICK_CLIENT_ID/SECRET`.
+Current state: Sprint 9.2 done — `KickAdapter` in `app/adapters/kick.py` (official Public API: `categories?q=` text search then `v2/livestreams?category_id=`, channel-stable ids, `users/livestreams` reverify, token cache + 401 retry, defensive `_first` field mapping for payload drift, configurable `KICK_EMBED_PARENT`); keyed by `KICK_CLIENT_ID/SECRET`, participates in the yt/twitch/kick/fakes factory matrix. Dual-platform-of-3 live verification deferred until credentials exist (procedure in worklog 9.2). `is_mature` stays in metadata, NOT surfaced — policy decision pending. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

@@ -437,4 +437,27 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
 - **Verdict: GO** for Sprint 9.2, gated on credentials exactly like Twitch. Playback embed details (player URL / parent-domain restriction) and mature-content policy (`is_mature` present per stream) are the two open items to settle during implementation; recommended default is to omit mature streams.
 - Non-goals (deferred): the adapter itself (9.2); live verification until credentials exist; mature-content policy decision (flagged, not made).
 - Verification: none applicable — research/documentation only, no code changed. `git status` confirms no source touched.
-- Commit: (this worklog entry pending)
+- Commit: `b565863 docs: sprint 9.1 kick feasibility research (GO, official public API)` (+ merge `9b3d167`)
+
+## 2026-10-08 — Sprint 9.2 Kick Adapter (live verify deferred)
+
+- Sprint: 9.2 (Goal: third platform, if 9.1 supports it)
+- Branch: `feat/9-2-kick-adapter`
+- What: `app/adapters/kick.py` (`KickAdapter`) — official Public API only, mirroring the Twitch adapter's structure:
+  - App Access Token via `client_credentials` at `id.kick.com/oauth2/token`, cached until 60s before expiry, refreshed once on 401;
+  - discovery `GET /public/v1/categories?q={topic}` → `GET /public/v2/livestreams?category_id=[...]` (≤25), unfiltered top-live fallback when no category matches;
+  - `GET /public/v1/users/livestreams?broadcaster_user_id=[...]` (≤100) for the 4.3 refresh contract;
+  - channel-stable `platform_stream_id` (broadcaster user id) so refresh + dedup behave;
+  - configurable `KICK_CLIENT_ID/SECRET/MAX_RESULTS/MAX_CATEGORIES/EMBED_PARENT`; participates in the yt/twitch/kick/fakes factory matrix, never mixed with fakes.
+- Field-shape honesty: Kick's published livestream payload varies across revisions, so mapping reads go through `_first` (first present key wins) and `_nested` for nested-vs-flat shapes. A rename degrades to fewer results, not a crash. `tests/test_kick.py` pins both shapes we know, and the docstring says plainly that live field names must be confirmed against the real API.
+- Bugs caught by writing the tests (not by review):
+  - `language` was buried in `metadata`, which would have silently broken the Sprint 8.1 language filter for Kick — now a first-class field;
+  - flat `category_name` (non-nested shape) was unmapped.
+- Non-goals (deferred): live verification until credentials exist; mature-content policy (`is_mature` recorded in metadata, NOT surfaced — flagged in 9.1, decision still open); v1→v2 endpoint migration (v1 categories is deprecated but is the only text-search variant).
+- Verification:
+  - Backend: `python -m pytest -q` → **204 passed** (12 new in `tests/test_kick.py`: full mapping incl. language/tags/embed-parent/absent-geo, category-q then category_id livestreams, top-live fallback, reverify live/offline, token caching, 401 refresh, 429 controlled error, config errors, legacy field-shape variant, factory matrix, service validation, configurable parent); `python -m ruff check .` → clean
+  - Frontend untouched (no contract change): checks skipped
+  - Live (no-cred): app boots, `GET /api/health` 200, `?q=storm` → 3 fake-platform results — Kick correctly absent without credentials; stats consistent; smoke `.db` removed after
+  - Environmental note: the first smoke attempt hit a *different local project's* server holding port 8000 (`C:\Users\j\Projects\matrix`), which produced a confusing `KeyError: 'count'`. Re-ran on port 8011 after confirming the bind failure in the server log. Worth remembering: check `Get-CimInstance Win32_Process` for port conflicts before trusting a smoke result.
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- Deferred live procedure (needs `KICK_CLIENT_ID/SECRET`): set in `backend/.env`, restart, `GET /api/search?q=` for topics with Kick coverage → expect `platform: "kick"` records, each verifiably live; open `source_url` to confirm; check the real field names against the mapped ones and adjust `_first` key lists if Kick sent different keys.

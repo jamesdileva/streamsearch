@@ -19,6 +19,11 @@ class Settings:
     twitch_max_results: int = int(os.getenv("TWITCH_MAX_RESULTS", "10"))
     twitch_max_categories: int = int(os.getenv("TWITCH_MAX_CATEGORIES", "3"))
     twitch_embed_parent: str = os.getenv("TWITCH_EMBED_PARENT", "localhost")
+    kick_client_id: str = os.getenv("KICK_CLIENT_ID", "")
+    kick_client_secret: str = os.getenv("KICK_CLIENT_SECRET", "")
+    kick_max_results: int = int(os.getenv("KICK_MAX_RESULTS", "25"))
+    kick_max_categories: int = int(os.getenv("KICK_MAX_CATEGORIES", "3"))
+    kick_embed_parent: str = os.getenv("KICK_EMBED_PARENT", "localhost")
     # Freshness thresholds (seconds since last_verified_at). See
     # services/freshness.py. Periodic revalidation lands in Sprint 4.3.
     freshness_fresh_seconds: int = int(os.getenv("FRESHNESS_FRESH_SECONDS", "300"))

@@ -36,7 +36,7 @@ python -m uvicorn app.main:app --reload
 # &has_location=true — filters combine with the query server-side.
 ```
 
-Sprint 9.1 done — Kick feasibility: **GO** (official Public API, `categories?q=` text search then `livestreams?category_id=`, no scraping; App Access Token via client_credentials; no geo fields; 429 rate limits with unpublished numbers). Two open items for 9.2: embed parent-domain and `is_mature` policy (recommend omitting). See `docs/kick-feasibility.md` and `docs/sprint-roadmap.md` (next: 9.2 Kick adapter).
+Sprint 9.2 done — `KickAdapter` (official Public API: `categories?q=` text search then `v2/livestreams?category_id=`, top-live fallback, channel-stable ids, `users/livestreams` reverify, token cache + 401 retry, defensive field mapping across Kick payload revisions); keyed by `KICK_CLIENT_ID/SECRET`, in the yt/twitch/kick/fakes factory matrix. 3-platform live verification **deferred** until credentials exist. Open item: `is_mature` policy (held in metadata, not surfaced). Next: `docs/sprint-roadmap.md` (10.1 platform failure isolation).
 
 ## Target stack
 

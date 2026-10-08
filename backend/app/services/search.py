@@ -14,6 +14,7 @@ import logging
 
 from app.adapters.base import AdapterError, BasePlatformAdapter, FakeAdapter
 from app.adapters.fake_twitch import FakeTwitchAdapter
+from app.adapters.kick import KickAdapter
 from app.adapters.twitch import TwitchAdapter
 from app.adapters.youtube import YouTubeAdapter
 from app.config import settings
@@ -46,6 +47,16 @@ def build_default_adapters() -> list[BasePlatformAdapter]:
                 max_results=settings.twitch_max_results,
                 max_categories=settings.twitch_max_categories,
                 embed_parent=settings.twitch_embed_parent,
+            )
+        )
+    if settings.kick_client_id and settings.kick_client_secret:
+        adapters.append(
+            KickAdapter(
+                client_id=settings.kick_client_id,
+                client_secret=settings.kick_client_secret,
+                max_results=settings.kick_max_results,
+                max_categories=settings.kick_max_categories,
+                embed_parent=settings.kick_embed_parent,
             )
         )
     if adapters:

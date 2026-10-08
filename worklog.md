@@ -271,4 +271,17 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Corrections during verify: insertion-ordered refs (not platform-sorted); public `new_event_id()` (throwaway `Event()` fails required-topic validation)
   - Live: app boots, health ok, mixed search shape unchanged; smoke `.db` removed after
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
-- Commit: `41a8a9d feat: sprint 6.1 event vs stream data model (...)` (+ this worklog entry pending)
+- Commit: `41a8a9d feat: sprint 6.1 event vs stream data model (...)` (+ `2b082ba docs: worklog sprint 6.1`, merge `fb3a808`)
+
+## 2026-10-08 — Sprint 6.2 Basic Duplicate Detection
+
+- Sprint: 6.2 (Goal: collapse obvious duplicates, never unrelated streams)
+- Branch: `feat/6-2-duplicate-detection`
+- What: `app/search/dedup.py` (same-id always; same-channel + title Jaccard ≥0.8 + 6h start window; missing times can't disprove; different channels never collapse incl. cross-platform); best-ranked survives (post-rank collapse); `duplicates_removed` on `SearchResponse`; index keeps every sighting
+- Non-goals (deferred): event clustering/grouping (6.3 — dedup must not do its job); UI display of removed count; per-creator cross-event logic
+- Verification:
+  - Backend: `python -m pytest -q` → 139 passed (8 new manual set: same-id, same-channel overlap, cross-platform simulcast, different-topics survive, different-channels-same-title survive, far-apart-time survives, missing-times collapse, service collapse + index-keeps-sightings); `python -m ruff check .` → clean
+  - All pre-existing suites unaffected (fixtures correctly never collapse); frontend untouched (additive response field only): checks skipped
+  - Live: `?q=storm` → count 3, removed 0 (no false collapse in production path); smoke `.db` removed after
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- Commit: `08b0cb7 feat: sprint 6.2 basic duplicate detection (...)` (+ this worklog entry pending)

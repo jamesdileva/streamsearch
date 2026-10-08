@@ -12,7 +12,7 @@
 
 ## Status
 
-Sprint 6.1 done — event data model (`Event`: topic, location, detected_at, active_until, related `(platform, platform_stream_id)` refs; SQLite `events` + `event_streams`; manual create/get/extend/close ops, no clustering, no endpoints yet). Dual-platform live verification **deferred** until both credentials exist. To smoke-test once you have them:
+Sprint 6.2 done — basic duplicate detection (`app/search/dedup.py`: same-id always; same-channel + ≥0.8 title Jaccard + 6h start window; different channels never collapse; best-ranked survives; response-only via `duplicates_removed`, index keeps all sightings). Dual-platform live verification **deferred** until both credentials exist. To smoke-test once you have them:
 
 ```powershell
 # backend/.env (never commit it):
@@ -30,7 +30,7 @@ python -m uvicorn app.main:app --reload
 # &has_location=true — filters combine with the query server-side.
 ```
 
-See `docs/sprint-roadmap.md` (next: 6.2 basic duplicate detection).
+See `docs/sprint-roadmap.md` (next: 6.3 event clustering experiment).
 
 ## Target stack
 

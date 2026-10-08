@@ -60,3 +60,5 @@ class SearchResponse(BaseModel):
     query: str
     results: list[Stream] = Field(default_factory=list)
     count: int = 0
+    # Collapsed by dedup (Sprint 6.2); the index keeps every sighting.
+    duplicates_removed: int = 0

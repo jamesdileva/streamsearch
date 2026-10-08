@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 6.1 done — `Event` model + SQLite event store (`events` + `event_streams`; manual create/get/extend/close, idempotent refs, no FK enforcement by design); no clustering, no event endpoints yet (deferred until UI/clustering needs them). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 6.2 done — dedup in `app/search/dedup.py` (same-id; same-channel + title≥0.8 + 6h window; cross-channel never; best-ranked survives; `duplicates_removed` on response, index keeps sightings). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

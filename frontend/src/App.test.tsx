@@ -21,6 +21,7 @@ const STREAM: Stream = {
   started_at: null,
   last_verified_at: new Date().toISOString(),
   viewer_count: null,
+  language: 'en',
   location_text: null,
   score: null,
 };
@@ -202,4 +203,53 @@ test('filter changes before any search do not fetch', () => {
     target: { value: 'newest' },
   });
   expect(search).not.toHaveBeenCalled();
+});
+
+test('language options come from results and refetch on change', async () => {
+  const ja: Stream = {
+    ...STREAM,
+    id: 'fake-2',
+    platform_stream_id: 'fake-2',
+    title: 'Japanese live',
+    language: 'ja',
+  };
+  const unknown: Stream = {
+    ...STREAM,
+    id: 'fake-3',
+    platform_stream_id: 'fake-3',
+    title: 'No language reported',
+    language: null,
+  };
+  const search = vi.spyOn(api, 'searchStreams').mockResolvedValue({
+    query: 'wildfire',
+    results: [STREAM, ja, unknown],
+    count: 3,
+  });
+  render(<App />);
+  submitQuery('wildfire');
+  await screen.findAllByTestId('search-result');
+
+  const options = screen
+    .getByRole('combobox', { name: 'Language' })
+    .querySelectorAll('option');
+  // Only reported languages appear — 'null' never becomes an option.
+  expect([...options].map((o) => o.getAttribute('value'))).toEqual(['', 'en', 'ja']);
+
+  fireEvent.change(screen.getByRole('combobox', { name: 'Language' }), {
+    target: { value: 'ja' },
+  });
+  await waitFor(() => expect(search).toHaveBeenCalledTimes(2));
+  expect(search.mock.calls[1][1]).toMatchObject({ language: 'ja' });
+});
+
+test('min viewers change refetches with the numeric floor', async () => {
+  const search = vi.spyOn(api, 'searchStreams');
+  render(<App />);
+  submitQuery('wildfire');
+  await screen.findAllByTestId('search-result');
+  fireEvent.change(screen.getByLabelText('Min viewers'), {
+    target: { value: '500' },
+  });
+  await waitFor(() => expect(search).toHaveBeenCalledTimes(2));
+  expect(search.mock.calls[1][1]).toMatchObject({ minViewers: 500 });
 });

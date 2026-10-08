@@ -21,6 +21,7 @@ const FULL: Stream = {
   last_verified_at: new Date().toISOString(),
   viewer_count: 1234,
   location_text: 'Florida',
+  language: 'en',
   score: 160.0,
 };
 
@@ -42,6 +43,7 @@ const MINIMAL: Stream = {
   last_verified_at: null,
   viewer_count: null,
   location_text: null,
+  language: 'en',
   score: null,
 };
 

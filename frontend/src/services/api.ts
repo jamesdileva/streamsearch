@@ -8,6 +8,8 @@ export interface SearchOptions {
   platform?: string;
   sort?: string;
   hasLocation?: boolean;
+  language?: string;
+  minViewers?: number;
 }
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
@@ -32,6 +34,12 @@ export async function searchStreams(
   }
   if (opts.hasLocation) {
     params.set('has_location', 'true');
+  }
+  if (opts.language) {
+    params.set('language', opts.language);
+  }
+  if (opts.minViewers) {
+    params.set('min_viewers', String(opts.minViewers));
   }
   const res = await fetch(`${API_BASE}/api/search?${params.toString()}`, {
     signal,

@@ -53,6 +53,7 @@ class FakeTwitchAdapter(BasePlatformAdapter):
             "discovered_at": now,
             "last_verified_at": now,
             "viewer_count": viewers,
+            "language": "en",
             "category": game,
             "tags": ["English", "Live"],
             "latitude": None,

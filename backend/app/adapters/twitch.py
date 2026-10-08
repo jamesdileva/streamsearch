@@ -175,6 +175,7 @@ class TwitchAdapter(BasePlatformAdapter):
             "discovered_at": now,
             "last_verified_at": now,
             "viewer_count": _to_int(item.get("viewer_count")),
+            "language": str(item.get("language")).strip().lower() or None,
             "category": item.get("game_name") or None,
             "tags": list(item.get("tags") or []),
             "latitude": None,

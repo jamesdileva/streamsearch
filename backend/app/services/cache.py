@@ -47,9 +47,14 @@ class SearchCache:
         platform_filter: str = "all",
         sort: str = "relevance",
         has_location: bool = False,
+        language: str = "",
+        min_viewers: int = 0,
     ) -> str:
         base = f"{'|'.join(platforms)}::{normalized_text(query)}"
-        return f"{base}::p={platform_filter}::s={sort}::loc={int(has_location)}"
+        return (
+            f"{base}::p={platform_filter}::s={sort}::loc={int(has_location)}"
+            f"::l={language}::v={min_viewers}"
+        )
 
     def _purge_expired(self, now: float) -> None:
         expired = [k for k, (_, exp) in self._entries.items() if exp <= now]

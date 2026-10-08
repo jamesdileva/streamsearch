@@ -369,4 +369,19 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Live: `?q=storm` → 3 ranked results, `removed: 0`, distinct scores preserved across platforms; stats consistent; smoke `.db` removed after
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
 - Deferred: revisit embeddings only with a meaningfully larger **real-traffic** failure dataset; root-cause fixes for the 4 remaining gaps (vocabulary/synonym) would need a lexical-level approach (e.g. small curated synonym map), which is a cheaper next candidate than embeddings.
+- Commit: `82e3aa1 feat: sprint 7.3 hybrid ranking decision (...)` (+ merge `428a23d`)
+
+## 2026-10-08 — Sprint 8.1 Search Filters
+
+- Sprint: 8.1 (Goal: make large result sets manageable)
+- Branch: `feat/8-1-search-filters`
+- Scope note: platform / sort / has_location already shipped in 5.3, so this sprint adds only the two genuinely new dimensions — **language** and **min viewers**.
+- What: `Stream.language` (YouTube `defaultAudioLanguage`/`defaultLanguage`, Twitch `language`; BCP-47 primary subtag, lowercase; absent stays absent — never guessed); language filter (exact, case-insensitive) and min-viewers floor (records with unknown viewer counts are excluded, not silently passed); filter-aware cache keys; language + platform options derived from live results in the UI, never hardcoded; min-viewers number input with blank→0.
+- Non-goals (deferred): map experiment (8.2); multilingual search itself (Phase 15 — this only *filters* on reported language); geo-radius drill-down.
+- Verification:
+  - Backend: `python -m pytest -q` → **180 passed** (13 new in `tests/test_filters.py`: language helper subtag/absent, YouTube + Twitch population via mocked transports, exact/case-insensitive matching, unknown-language exclusion, min-viewers floor semantics incl. unknown exclusion + combining, API params, negative→422, cache-key separation); `python -m ruff check .` → clean
+  - Frontend: `npm run typecheck` OK; `npm run lint` clean; `npm run test` → **38 passed** (5 SearchFilters + 2 App tests: language options exclude null, min-viewers refetch); `npm run build` OK
+  - Consistency fix found in live smoke: FastAPI's native `Query(ge=0)` validation returned `{"detail": [...]}` instead of the project envelope, so `min_viewers` is now validated in-body and returns `{"error": {"code": 422, ...}}` like every other search error. Pinned by test.
+  - Live: `?q=storm` → 3 (lang en, viewers 5231/None/None); `&language=ja` → 0 (absent doesn't masquerade as a match); `&min_viewers=1000` → 1 (the 5231 record; None-viewer excluded); `&min_viewers=-5` → 422 envelope; filter variants cached separately (`cache_size: 4`)
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
 - Commit: (this worklog entry pending)

@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 7.1 done — failure dataset in `backend/benchmarks/failure_dataset.py` (5 pinned keyword gaps + 3 controls; `python -m benchmarks.failure_dataset`; tripwire tests fail loudly if any case flips). Verdict: adversarial gaps justify a 7.2 prototype, not production semantics. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 7.2 done — embedding prototype in `app/search/embeddings.py` (Ollama HTTP client, cosine, min-max hybrid; UNWIRED from search). Measured on the 7.1 set: keyword 3/8 → semantic 4/8 → hybrid 4/8. Verdict: NOT adopted for production — 137M nomic-embed-text confuses different-state wildfire talk with live fire; larger-model retest is the cheap next step (see worklog). `OLLAMA_HOST`/`EMBEDDINGS_MODEL` config; no torch dependency added. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

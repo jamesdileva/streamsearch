@@ -12,7 +12,7 @@
 
 ## Status
 
-Sprint 5.2 done — real Twitch adapter (Helix `search/categories` → `streams`, channel-stable ids, game categories, substituted thumbnails, 401-refreshing token cache, channel reverify; keyed by `TWITCH_CLIENT_ID/SECRET`, never mixed with fakes). Dual-platform live verification **deferred** until both credentials exist. To smoke-test once you have them:
+Sprint 5.3 done — unified cross-platform results (one ranked set, no platform term in scoring; server-side `platform` / `sort=relevance|newest|viewers` / `has_location` params; `SearchFilters` UI with platform options derived from live results; filter variants get separate cache entries). Dual-platform live verification **deferred** until both credentials exist. To smoke-test once you have them:
 
 ```powershell
 # backend/.env (never commit it):
@@ -26,9 +26,11 @@ python -m uvicorn app.main:app --reload
 # concert). Confirm per query: results appear, titles/thumbnails match
 # source, links open the live broadcast, platform identified, no raw API
 # fields in UI, and neither platform dominates every query.
+# Also try: &platform=twitch, &sort=viewers, &sort=newest,
+# &has_location=true — filters combine with the query server-side.
 ```
 
-See `docs/sprint-roadmap.md` (next: 5.3 unified cross-platform results).
+See `docs/sprint-roadmap.md` (next: 6.1 event vs. stream data model).
 
 ## Target stack
 

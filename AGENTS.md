@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 5.2 done — `TwitchAdapter` (Helix categories→streams, channel-stable ids, token cache + 401 retry, channel reverify) keyed by `TWITCH_CLIENT_ID/SECRET`; factory matrix yt/twitch/both/fakes, fakes never mixed with real; dual-platform live verification deferred until both credentials exist. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 5.3 done — unified ranking (no platform term in scoring; ended-last partition kept across sorts) + server-side `platform`/`sort`/`has_location` params with cache-key separation; `SearchFilters` UI (platform options derived from results, never hardcoded) in `components/` + `lib/filters.ts`. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

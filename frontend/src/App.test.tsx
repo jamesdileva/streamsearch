@@ -87,7 +87,8 @@ test('long query passes through to the API', async () => {
   const search = vi.spyOn(api, 'searchStreams');
   render(<App />);
   submitQuery(long);
-  await waitFor(() => expect(search).toHaveBeenCalledWith(long));
+  await waitFor(() => expect(search).toHaveBeenCalled());
+  expect(search.mock.calls[0][0]).toBe(long);
   expect(await screen.findAllByTestId('search-result')).toHaveLength(1);
 });
 
@@ -96,7 +97,8 @@ test('special characters pass through unmodified', async () => {
   const search = vi.spyOn(api, 'searchStreams');
   render(<App />);
   submitQuery(special);
-  await waitFor(() => expect(search).toHaveBeenCalledWith(special));
+  await waitFor(() => expect(search).toHaveBeenCalled());
+  expect(search.mock.calls[0][0]).toBe(special);
   expect(await screen.findAllByTestId('search-result')).toHaveLength(1);
 });
 
@@ -119,7 +121,7 @@ test('repeated searches show the latest results', async () => {
     expect(rows[0]).toHaveTextContent('Second result');
   });
   expect(search).toHaveBeenCalledTimes(2);
-  expect(search).toHaveBeenLastCalledWith('two');
+  expect(search.mock.calls[1][0]).toBe('two');
 });
 
 test('empty results show the empty state', async () => {
@@ -144,4 +146,60 @@ test('failed search shows the error state', async () => {
   await waitFor(() =>
     expect(screen.getByTestId('search-error')).toHaveTextContent('boom'),
   );
+});
+
+test('platform options come from results and refetch on change', async () => {
+  const twitch: Stream = {
+    ...STREAM,
+    id: 'twitch-1',
+    platform: 'twitch',
+    platform_stream_id: '1',
+    title: 'Twitch live',
+  };
+  const search = vi.spyOn(api, 'searchStreams').mockResolvedValue({
+    query: 'wildfire',
+    results: [STREAM, twitch],
+    count: 2,
+  });
+  render(<App />);
+  submitQuery('wildfire');
+  await screen.findAllByTestId('search-result');
+  const options = screen
+    .getByRole('combobox', { name: 'Platform' })
+    .querySelectorAll('option');
+  expect([...options].map((o) => o.getAttribute('value'))).toEqual([
+    'all',
+    'fake',
+    'twitch',
+  ]);
+  fireEvent.change(screen.getByRole('combobox', { name: 'Platform' }), {
+    target: { value: 'twitch' },
+  });
+  await waitFor(() => expect(search).toHaveBeenCalledTimes(2));
+  expect(search.mock.calls[1][0]).toBe('wildfire');
+  expect(search.mock.calls[1][1]).toMatchObject({ platform: 'twitch' });
+});
+
+test('sort and location changes refetch the active query', async () => {
+  const search = vi.spyOn(api, 'searchStreams');
+  render(<App />);
+  submitQuery('wildfire');
+  await screen.findAllByTestId('search-result');
+  fireEvent.change(screen.getByRole('combobox', { name: 'Sort' }), {
+    target: { value: 'viewers' },
+  });
+  await waitFor(() => expect(search).toHaveBeenCalledTimes(2));
+  expect(search.mock.calls[1][1]).toMatchObject({ sort: 'viewers' });
+  fireEvent.click(screen.getByRole('checkbox'));
+  await waitFor(() => expect(search).toHaveBeenCalledTimes(3));
+  expect(search.mock.calls[2][1]).toMatchObject({ hasLocation: true });
+});
+
+test('filter changes before any search do not fetch', () => {
+  const search = vi.spyOn(api, 'searchStreams');
+  render(<App />);
+  fireEvent.change(screen.getByRole('combobox', { name: 'Sort' }), {
+    target: { value: 'newest' },
+  });
+  expect(search).not.toHaveBeenCalled();
 });

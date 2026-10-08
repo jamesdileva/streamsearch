@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import ResultsList from './components/ResultsList';
 import SearchBar from './components/SearchBar';
+import SearchFilters from './components/SearchFilters';
+import { DEFAULT_FILTERS, type FilterState } from './lib/filters';
 import { fetchHealth, searchStreams } from './services/api';
 import type { Stream } from './types';
 
@@ -23,6 +25,8 @@ function errMessage(e: unknown): string {
 export default function App() {
   const [health, setHealth] = useState<HealthState>({ status: 'loading' });
   const [search, setSearch] = useState<SearchState>({ status: 'idle' });
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [submitted, setSubmitted] = useState<string | null>(null);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -35,14 +39,10 @@ export default function App() {
   }, []);
 
   // Submit search (debounced/submit only — never per-keystroke fan-out).
-  const runSearch = (raw: string) => {
-    const query = raw.trim();
-    if (!query) {
-      setSearch({ status: 'empty-query' });
-      return;
-    }
+  // Filter changes re-run the active query server-side (cache-guarded).
+  const execute = (query: string, opts: FilterState) => {
     setSearch({ status: 'loading', query });
-    searchStreams(query)
+    searchStreams(query, opts)
       .then((r) =>
         setSearch({ status: 'ok', query, streams: r.results }),
       )
@@ -51,6 +51,26 @@ export default function App() {
       );
   };
 
+  const runSearch = (raw: string) => {
+    const query = raw.trim();
+    if (!query) {
+      setSearch({ status: 'empty-query' });
+      return;
+    }
+    setSubmitted(query);
+    execute(query, filters);
+  };
+
+  const changeFilters = (next: FilterState) => {
+    setFilters(next);
+    if (submitted) execute(submitted, next);
+  };
+
+  const platforms =
+    search.status === 'ok'
+      ? [...new Set(search.streams.map((s) => s.platform))]
+      : [];
+
   return (
     <main style={{ maxWidth: 640, margin: '0 auto', padding: 24 }}>
       <h1>StreamSearch</h1>
@@ -58,6 +78,12 @@ export default function App() {
       <SearchBar
         isLoading={search.status === 'loading'}
         onSearch={runSearch}
+      />
+      <SearchFilters
+        platforms={platforms}
+        value={filters}
+        disabled={search.status === 'loading'}
+        onChange={changeFilters}
       />
 
       <section aria-label="search results" aria-live="polite">

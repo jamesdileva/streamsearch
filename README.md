@@ -36,7 +36,7 @@ python -m uvicorn app.main:app --reload
 # &has_location=true — filters combine with the query server-side.
 ```
 
-See `docs/sprint-roadmap.md` (next: 8.3 mobile/responsive pass).
+See `docs/sprint-roadmap.md` (next: 9.1 Kick feasibility).
 
 ## Target stack
 

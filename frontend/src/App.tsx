@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import ResultsList from './components/ResultsList';
 import SearchBar from './components/SearchBar';
 import SearchFilters from './components/SearchFilters';
+import WatchModal from './components/WatchModal';
 import { DEFAULT_FILTERS, type FilterState } from './lib/filters';
 import { fetchHealth, searchStreams } from './services/api';
 import type { Stream } from './types';
@@ -27,6 +28,7 @@ export default function App() {
   const [search, setSearch] = useState<SearchState>({ status: 'idle' });
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [submitted, setSubmitted] = useState<string | null>(null);
+  const [watching, setWatching] = useState<Stream | null>(null);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -85,7 +87,7 @@ export default function App() {
       : [];
 
   return (
-    <main style={{ maxWidth: 640, margin: '0 auto', padding: 24 }}>
+    <main className="app-main">
       <h1>StreamSearch</h1>
       <p>What are you looking for happening live?</p>
       <SearchBar
@@ -118,7 +120,7 @@ export default function App() {
               Found {search.streams.length} live stream
               {search.streams.length === 1 ? '' : 's'} for “{search.query}”.
             </p>
-            <ResultsList streams={search.streams} />
+            <ResultsList streams={search.streams} onWatch={setWatching} />
           </>
         )}
         {search.status === 'ok' && search.streams.length === 0 && (
@@ -138,6 +140,13 @@ export default function App() {
       )}
       {health.status === 'error' && (
         <p data-testid="backend-error">Backend unreachable: {health.message}</p>
+      )}
+
+      {watching && (
+        <WatchModal
+          stream={watching}
+          onClose={() => setWatching(null)}
+        />
       )}
     </main>
   );

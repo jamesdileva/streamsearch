@@ -253,3 +253,28 @@ test('min viewers change refetches with the numeric floor', async () => {
   await waitFor(() => expect(search).toHaveBeenCalledTimes(2));
   expect(search.mock.calls[1][1]).toMatchObject({ minViewers: 500 });
 });
+test('watch button opens and closes the full-screen player', async () => {
+  const watchable: Stream = {
+    ...STREAM,
+    embed_supported: true,
+    embed_url: 'https://www.youtube.com/embed/fake-1',
+  };
+  vi.spyOn(api, 'searchStreams').mockResolvedValue({
+    query: 'wildfire',
+    results: [watchable],
+    count: 1,
+  });
+  render(<App />);
+  submitQuery('wildfire');
+  fireEvent.click(await screen.findByTestId('watch-button'));
+
+  const dialog = await screen.findByRole('dialog');
+  expect(dialog).toHaveAttribute('aria-modal', 'true');
+  expect(screen.getByTitle('Skeleton live: wildfire')).toHaveAttribute(
+    'src',
+    'https://www.youtube.com/embed/fake-1',
+  );
+
+  fireEvent.keyDown(document, { key: 'Escape' });
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+});

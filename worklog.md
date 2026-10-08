@@ -404,3 +404,19 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - A map of 0 markers over 3 records is decoration, not discovery — and the roadmap correctly names this as an experiment whose only job was to reach a decision.
 - What stays: `geo.py` + `GET /api/geo` as **instrumentation** (one endpoint, no new dependencies) so coverage can be re-measured if a future platform reports coordinates. Delete-on-evidence: if coverage stays 0% after Twitch ships, drop it.
 - Known prototype simplifications (recorded, not fixed): unweighted centroids are skewed by latitude; single-linkage clustering can chain; mixed-confidence records cluster together even though one is a guess.
+- Commit: `2a21b3c feat: sprint 8.2 map experiment (...)` (+ merge `84a8fff`)
+
+## 2026-10-08 — Sprint 8.3 Mobile / Responsive Pass
+
+- Sprint: 8.3 (Goal: usable on phones without a separate mobile app)
+- Branch: `feat/8-3-mobile-responsive`
+- Theme: **no toggle added** (confirmed with user — dark theme already works via `prefers-color-scheme` from Sprint 0.1 and OS-driven is the intended behaviour). One real dark-theme defect fixed: `.live-status--live` was hardcoded `#d92d20`, identical in both themes and dim on the dark surface. Now themed via `--live` (`#d92d20` light / `#ff6a5c` dark, same hue, lifted). Also removed dead Vite-demo CSS (`#social .button-icon`) from the dark media query.
+- Responsive: removed the Sprint 0.1 fixed `1126px` `#root` frame that stranded the results grid in empty space (main was additionally capped at `640px` via an inline style) — replaced with a fluid `.app-main` (max 1120px, 16px gutters ≤640px); the inline style is gone so layout is testable/overridable.
+- Touch: `@media (pointer: coarse)` gives interactive controls `min-height: 44px` (Apple/Google tap-target floor) — previously ~30–40px — with the report button full-width; `.stream-actions` children flex to fill on ≤640px so links are thumb-sized, not text-sized.
+- Playback: `components/WatchModal.tsx` full-screen embed player as the roadmap's "optional full-screen playback" — Watch is now a button that opens the modal instead of a new tab. Modal locks background scroll, closes on Escape/backdrop/button, moves focus to the close button on open and restores it on close (inner clicks stopPropagation), strict `referrerPolicy`, `allowFullScreen` + `allow` for playback affordances, iframe never rendered outside the modal (discovery stays separate from playback).
+- Non-goals (deferred): theme toggle (decided against), theme persistence across sessions (nothing to persist), swipe gestures, native app.
+- Verification:
+  - Frontend: `npm run typecheck` OK; `npm run lint` (oxlint) clean; `npm run test` → **46 passed** (7 new WatchModal tests: labelled iframe + referrerpolicy, focus on open, Escape, backdrop vs inner click, scroll lock, channel-name fallback; 2 new card tests incl. Watch-is-a-button + absent-when-unsupported; 1 new App modal open/close test; card/ResultsList tests updated for the button contract); `npm run build` OK; dev server → HTTP 200
+  - Backend untouched (no contract change): checks skipped
+  - Secrets: staged leak check empty; no `.env`/creds tracked
+- Note: remaining responsive fidelity (44px targets on a real touch device, dark-mode readability of `#ff6a5c`) is inherently visual and stays a manual check — the CSS + components are asserted, the pixels are not.

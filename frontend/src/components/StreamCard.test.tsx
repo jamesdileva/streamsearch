@@ -1,5 +1,5 @@
-import { render, screen, within } from '@testing-library/react';
-import { expect, test } from 'vitest';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { expect, test, vi } from 'vitest';
 import StreamCard from './StreamCard';
 import type { Stream } from '../types';
 
@@ -48,7 +48,8 @@ const MINIMAL: Stream = {
 };
 
 test('full record shows every card element', () => {
-  render(<StreamCard stream={FULL} />);
+  const onWatch = vi.fn();
+  render(<StreamCard stream={FULL} onWatch={onWatch} />);
   const card = screen.getByTestId('stream-card');
 
   expect(within(card).getByTestId('live-status')).toHaveTextContent('LIVE');
@@ -72,12 +73,11 @@ test('full record shows every card element', () => {
   expect(within(card).getByText('1,234 watching')).toBeInTheDocument();
   expect(within(card).getByText('Florida')).toBeInTheDocument();
 
-  const watch = within(card).getByRole('link', { name: 'Watch' });
-  expect(watch).toHaveAttribute(
-    'href',
-    'https://www.youtube.com/embed/abc',
-  );
-  expect(watch).toHaveAttribute('target', '_blank');
+  const watch = within(card).getByTestId('watch-button');
+  fireEvent.click(watch);
+  // Playback is opt-in per the design: no auto-navigation, no new tab.
+  expect(onWatch).toHaveBeenCalledTimes(1);
+  expect(onWatch.mock.calls[0][0]).toBe(FULL);
   const source = within(card).getByRole('link', { name: 'Open Source' });
   expect(source).toHaveAttribute(
     'href',
@@ -85,8 +85,15 @@ test('full record shows every card element', () => {
   );
 });
 
+test('watch button is absent when embedding is unsupported', () => {
+  render(
+    <StreamCard stream={{ ...FULL, embed_supported: false }} onWatch={vi.fn()} />,
+  );
+  expect(screen.queryByTestId('watch-button')).not.toBeInTheDocument();
+});
+
 test('minimal record omits everything unavailable', () => {
-  render(<StreamCard stream={MINIMAL} />);
+  render(<StreamCard stream={MINIMAL} onWatch={vi.fn()} />);
   const card = screen.getByTestId('stream-card');
 
   expect(within(card).getByTestId('live-status')).toHaveTextContent('Unknown');
@@ -104,7 +111,7 @@ test('minimal record omits everything unavailable', () => {
 });
 
 test('ended record shows ended status without live styling', () => {
-  render(<StreamCard stream={{ ...FULL, live_status: 'ended' }} />);
+  render(<StreamCard stream={{ ...FULL, live_status: 'ended' }} onWatch={vi.fn()} />);
   const badge = screen.getByTestId('live-status');
   expect(badge).toHaveTextContent('Ended');
   expect(badge).toHaveClass('live-status--ended');
@@ -118,6 +125,7 @@ test('aging record shows verified age', () => {
   render(
     <StreamCard
       stream={{ ...FULL, freshness: 'aging', last_verified_at: twelveMinAgo }}
+      onWatch={vi.fn()}
     />,
   );
   expect(screen.getByTestId('live-freshness')).toHaveTextContent(

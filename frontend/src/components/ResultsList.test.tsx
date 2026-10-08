@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import ResultsList from './ResultsList';
 import type { Stream } from '../types';
 
@@ -49,7 +49,7 @@ const STREAMS: Stream[] = [
 ];
 
 test('renders one card per stream', () => {
-  render(<ResultsList streams={STREAMS} />);
+  render(<ResultsList streams={STREAMS} onWatch={vi.fn()} />);
   const rows = screen.getAllByTestId('search-result');
   expect(rows).toHaveLength(2);
   expect(rows[0]).toHaveTextContent('Title A');
@@ -59,6 +59,6 @@ test('renders one card per stream', () => {
 });
 
 test('renders no rows for empty results', () => {
-  render(<ResultsList streams={[]} />);
+  render(<ResultsList streams={[]} onWatch={vi.fn()} />);
   expect(screen.queryByTestId('search-result')).not.toBeInTheDocument();
 });

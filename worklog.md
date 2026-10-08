@@ -257,4 +257,18 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Frontend: `npm run typecheck` OK; `npm run lint` clean (moved filter types to `lib/filters.ts` after Fast Refresh warning); `npm run test` → 33 passed (3 SearchFilters + 3 App filter tests + updated call assertions); `npm run build` OK; dev server → HTTP 200
   - Live: mixed `?q=storm` → 3 records fake+twitch; `&platform=twitch` → 2 twitch-only; `&sort=viewers` → `[5231, None, None]`; bad sort → 422 envelope; smoke `.db` removed after
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
-- Commit: `5106f4d feat: sprint 5.3 unified cross-platform results (...)` (+ this worklog entry pending)
+- Commit: `5106f4d feat: sprint 5.3 unified cross-platform results (...)` (+ `c05dbe4 docs: worklog sprint 5.3`, merge `42d3934`)
+
+## 2026-10-08 — Sprint 6.1 Event vs. Stream Data Model
+
+- Sprint: 6.1 (Goal: one event → many broadcasts, as a persisted concept)
+- Branch: `feat/6-1-event-model`
+- What: `models/event.py` (`Event`: auto `evt_*` id, non-empty topic, optional location, detected_at, active_until, `related_streams[]` as `(platform, platform_stream_id)` refs, `is_active()`); `services/events.py` (SQLite `events` + `event_streams`; create/get/add-idempotent/close/list-active; refs not FK-enforced by design; duplicate ids → ValueError)
+- Non-goals (deferred): automatic clustering (6.2/6.3); event API endpoints (when UI/clustering needs them); report-driven grouping
+- Verification:
+  - Backend: `python -m pytest -q` → 131 passed (10 new: cross-platform manual group, auto-id/defaults, blank-topic + duplicate-id rejection, idempotent add, unknown-event errors, close + active filter + re-close no-op, get-unknown None, active boundary); `python -m ruff check .` → clean (fixed import order, blind-except)
+  - Frontend untouched (no contract changes): checks skipped
+  - Corrections during verify: insertion-ordered refs (not platform-sorted); public `new_event_id()` (throwaway `Event()` fails required-topic validation)
+  - Live: app boots, health ok, mixed search shape unchanged; smoke `.db` removed after
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- Commit: `41a8a9d feat: sprint 6.1 event vs stream data model (...)` (+ this worklog entry pending)

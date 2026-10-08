@@ -73,15 +73,21 @@ class SearchService:
         platform: str = "all",
         sort: str = "relevance",
         has_location: bool = False,
+        language: str = "",
+        min_viewers: int = 0,
     ) -> SearchResponse:
         normalized = query.strip()
         platform_filter = platform.strip().lower()
+        language_filter = language.strip().lower()
+        min_viewers = max(0, int(min_viewers))
         key = SearchCache.key(
             normalized,
             tuple(a.platform for a in self.adapters),
             platform_filter,
             sort,
             has_location,
+            language_filter,
+            min_viewers,
         )
         cached = self.cache.get(key)
         if cached is not None:
@@ -118,6 +124,12 @@ class SearchService:
                 for s in results
                 if s.location_text or (s.latitude is not None and s.longitude is not None)
             ]
+        if language_filter:
+            results = [s for s in results if s.language == language_filter]
+        if min_viewers:
+            # Records without viewer data can't satisfy a floor, so they're
+            # excluded rather than silently passed through.
+            results = [s for s in results if (s.viewer_count or 0) >= min_viewers]
         ranked = rank_streams(results, text_query, self.weights, parsed.place)
         # Collapse obvious duplicates for the response (best-ranked survives);
         # the index keeps every sighting the platforms reported.

@@ -36,7 +36,7 @@ python -m uvicorn app.main:app --reload
 # &has_location=true — filters combine with the query server-side.
 ```
 
-See `docs/sprint-roadmap.md` (next: 8.1 search filters).
+See `docs/sprint-roadmap.md` (next: 8.2 map experiment).
 
 ## Target stack
 

@@ -26,6 +26,14 @@ WATCH_URL = "https://www.youtube.com/watch"
 EMBED_URL = "https://www.youtube.com/embed"
 
 
+def _language(snippet: dict[str, Any]) -> str | None:
+    """BCP-47 primary subtag, e.g. "en". Absent stays absent."""
+    raw = snippet.get("defaultAudioLanguage") or snippet.get("defaultLanguage")
+    if not raw:
+        return None
+    return str(raw).strip().lower().split("-")[0] or None
+
+
 def _thumb(snippet: dict[str, Any]) -> str:
     thumbs = snippet.get("thumbnails") or {}
     for quality in ("high", "medium", "default"):
@@ -153,6 +161,7 @@ class YouTubeAdapter(BasePlatformAdapter):
             "discovered_at": now,
             "last_verified_at": now,
             "viewer_count": _to_int(live.get("concurrentViewers")),
+            "language": _language(snippet),
             "category": snippet.get("categoryId"),
             "tags": list(snippet.get("tags") or []),
             "latitude": location.get("latitude"),

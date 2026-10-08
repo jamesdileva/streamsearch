@@ -6,15 +6,18 @@ const SORTS = [
   { value: 'viewers', label: 'Most viewers' },
 ];
 
-// Server-side filters (Sprint 5.3). Platform options come from live
-// results — never hardcoded — so new adapters appear automatically.
+// Server-side filters (Sprint 5.3, extended 8.1). Platform and language
+// options come from live results — never hardcoded — so new adapters and
+// languages appear automatically.
 export default function SearchFilters({
   platforms,
+  languages,
   value,
   disabled = false,
   onChange,
 }: {
   platforms: string[];
+  languages: string[];
   value: FilterState;
   disabled?: boolean;
   onChange: (next: FilterState) => void;
@@ -51,6 +54,41 @@ export default function SearchFilters({
             </option>
           ))}
         </select>
+      </label>
+      <label>
+        Language{' '}
+        <select
+          aria-label="Language"
+          value={value.language}
+          disabled={disabled}
+          onChange={(e) => onChange({ ...value, language: e.target.value })}
+        >
+          <option value="">All languages</option>
+          {languages.map((l) => (
+            <option key={l} value={l}>
+              {l}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Min viewers{' '}
+        <input
+          type="number"
+          min={0}
+          step={100}
+          aria-label="Min viewers"
+          value={value.minViewers === 0 ? '' : String(value.minViewers)}
+          placeholder="0"
+          disabled={disabled}
+          onChange={(e) => {
+            const raw = e.target.value.trim();
+            onChange({
+              ...value,
+              minViewers: raw === '' ? 0 : Number(raw),
+            });
+          }}
+        />
       </label>
       <label>
         <input

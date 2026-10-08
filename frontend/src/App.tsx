@@ -66,9 +66,22 @@ export default function App() {
     if (submitted) execute(submitted, next);
   };
 
+  // "Where available" for both dimensions: only values actually present in
+  // the current results become options, so absent data never appears as a
+  // fake filter choice.
   const platforms =
     search.status === 'ok'
       ? [...new Set(search.streams.map((s) => s.platform))]
+      : [];
+  const languages =
+    search.status === 'ok'
+      ? [
+          ...new Set(
+            search.streams
+              .map((s) => s.language)
+              .filter((l): l is string => Boolean(l)),
+          ),
+        ].sort()
       : [];
 
   return (
@@ -81,6 +94,7 @@ export default function App() {
       />
       <SearchFilters
         platforms={platforms}
+        languages={languages}
         value={filters}
         disabled={search.status === 'loading'}
         onChange={changeFilters}

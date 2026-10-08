@@ -71,6 +71,7 @@ class FakeAdapter(BasePlatformAdapter):
             "discovered_at": now,
             "last_verified_at": now,
             "viewer_count": None,
+            "language": "en",
             "category": None,
             "tags": ["skeleton"],
             "latitude": None,

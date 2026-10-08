@@ -23,6 +23,7 @@ export interface Stream {
   started_at: string | null;
   last_verified_at: string | null;
   viewer_count: number | null;
+  language: string | null;
   location_text: string | null;
   // Query-relative ranking score stamped by the backend (Sprint 3.1).
   // Displayed nowhere; result order is the feature.

@@ -33,6 +33,11 @@ class Stream(BaseModel):
     discovered_at: datetime | None = None
     last_verified_at: datetime | None = None
     viewer_count: int | None = None
+    # Broadcast language where the platform reports one (Sprint 8.1).
+    # YouTube: defaultAudioLanguage/defaultLanguage; Twitch: language.
+    # Absent means unknown — never guessed. Normalized lowercase (BCP-47
+    # primary subtag, e.g. "en", "ja").
+    language: str | None = None
     category: str | None = None
     tags: list[str] = Field(default_factory=list)
     latitude: float | None = None

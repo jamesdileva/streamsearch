@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 7.3 done — hybrid ranking decided NOT adopted (evidence in worklog 7.2b). Keyword weight `description` 15→25 applied (only measured gain, no dependency); benchmark 4/8 with `description-weight` reclassified gap→control; `embeddings.py` remains experimental/unwired, re-run via `EMBEDDINGS_MODEL=<m> python -m benchmarks.embedding_experiment`. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 8.1 done — language + min-viewers filters (`Stream.language` from YouTube `defaultAudioLanguage` / Twitch `language`, reported-when-available; absent never matches; viewer floor excludes unknown counts; filter-aware cache keys; dropdown options derived from results, never hardcoded; all 422s share the `{"error":...}` envelope). Platform/sort/location shipped in 5.3. Embeddings stay experimental/unwired. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

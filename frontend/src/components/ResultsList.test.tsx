@@ -23,6 +23,7 @@ const STREAMS: Stream[] = [
     score: null,
     viewer_count: null,
     location_text: null,
+    language: 'en',
   },
   {
     id: 'b',
@@ -43,6 +44,7 @@ const STREAMS: Stream[] = [
     score: null,
     viewer_count: null,
     location_text: null,
+    language: 'en',
   },
 ];
 

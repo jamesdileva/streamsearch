@@ -384,4 +384,23 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Consistency fix found in live smoke: FastAPI's native `Query(ge=0)` validation returned `{"detail": [...]}` instead of the project envelope, so `min_viewers` is now validated in-body and returns `{"error": {"code": 422, ...}}` like every other search error. Pinned by test.
   - Live: `?q=storm` → 3 (lang en, viewers 5231/None/None); `&language=ja` → 0 (absent doesn't masquerade as a match); `&min_viewers=1000` → 1 (the 5231 record; None-viewer excluded); `&min_viewers=-5` → 422 envelope; filter variants cached separately (`cache_size: 4`)
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
-- Commit: (this worklog entry pending)
+- Commit: `f57bb28 feat: sprint 8.1 search filters (...)` (+ merge `a13e460`)
+
+## 2026-10-08 — Sprint 8.2 Map Experiment
+
+- Sprint: 8.2 (Goal: decide whether geographic visualization adds meaningful value)
+- Branch: `feat/8-2-map-experiment`
+- What: `app/search/geo.py` (confidence tiers `exact` = platform coordinates, `derived` = our own deterministic gazetteer resolution of free-text `location_text`, `unlocated`; `GeoMarker`/`GeoCluster`/`CoverageReport`; haversine distance; single-linkage clustering at 50km; unweighted centroids); `GET /api/geo?q=` prototype endpoint returning markers + clusters + measured coverage. Deliberately NOT wired to any UI — instrumentation, not a feature.
+- Non-goals (deferred): map UI components; a real geocoder (network lookup) — the gazetteer is documented as a *guess*, not a fact; per-cluster event semantics (6.3 already ruled clustering untrustworthy).
+- Verification:
+  - Backend: `python -m pytest -q` → **192 passed** (12 new in `tests/test_geo.py`: exact/derived/unlocated tiering, gazetteer token containment, unresolvable text, nonsense-coordinate rejection (untrusted platform data), coverage math + fractions, empty set, haversine known distances incl. antipode, cluster merge vs. split, singleton, mixed-confidence cluster merging, 422 envelope, live-coverage measurement); `python -m ruff check .` → clean
+  - Frontend untouched (no contract change; experiment is backend/instrumentation): checks skipped
+  - **Live measurement, the actual experiment**: `GET /api/geo?q=storm` → `total 3, exact 0, derived 0, unlocated 3`, 0 markers, 0 clusters. Empty `q` → 422 envelope.
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- **Verdict: the map does NOT ship in this product.** Measured geo coverage is **0%** in practice, by structure rather than by accident:
+  - YouTube is the **only** coordinate source (`recordingDetails.location`) and rarely populates it for live streams;
+  - Twitch reports **no** geodata at all;
+  - the free-text `location_text` fallback only resolves against our own 12-place gazetteer, which is a documented guess and only helps for a handful of major places.
+  - A map of 0 markers over 3 records is decoration, not discovery — and the roadmap correctly names this as an experiment whose only job was to reach a decision.
+- What stays: `geo.py` + `GET /api/geo` as **instrumentation** (one endpoint, no new dependencies) so coverage can be re-measured if a future platform reports coordinates. Delete-on-evidence: if coverage stays 0% after Twitch ships, drop it.
+- Known prototype simplifications (recorded, not fixed): unweighted centroids are skewed by latitude; single-linkage clustering can chain; mixed-confidence records cluster together even though one is a guess.

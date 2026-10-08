@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 8.1 done — language + min-viewers filters (`Stream.language` from YouTube `defaultAudioLanguage` / Twitch `language`, reported-when-available; absent never matches; viewer floor excludes unknown counts; filter-aware cache keys; dropdown options derived from results, never hardcoded; all 422s share the `{"error":...}` envelope). Platform/sort/location shipped in 5.3. Embeddings stay experimental/unwired. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 8.2 done — map experiment, **decision: map does NOT ship** (measured 0% geo coverage: YouTube is the only coordinate source and rarely reports it; Twitch never does). Prototype kept as instrumentation in `app/search/geo.py` + `GET /api/geo` (markers/clusters/coverage, confidence tiers `exact`/`derived`/unlocated, gazetteer is documented-as-guessing). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

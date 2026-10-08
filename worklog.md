@@ -332,3 +332,25 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
 - Verdict: NOT ADOPTED for production. Negative result is well-supported: (a) +1/8 with zero movement on the gap class that motivated the experiment; (b) semantic scoring actively inverts relevance vs lexically-similar records; (c) description semantics aren't even used by 3.1's keyword signal yet — fixing that is much cheaper.
 - Cheapest next step when wanted (NOT now): swap one of your existing chat models' embed endpoints or pull a larger embedder (e.g. `mxbai-embed-large`) and re-run `python -m benchmarks.embedding_experiment` — same command, same data, no code change. Decide after that.
 - Commit: (this worklog entry pending)
+
+## 2026-10-08 — Sprint 7.2b Embedding Bake-off (4 models)
+
+- Sprint: 7.2b (Goal: separate "semantic doesn't help" from "this model doesn't help")
+- Branch: `feat/7-2b-embedding-bakeoff`
+- Method fix (important): added `ModelPreset` per-model documented query/doc prefixes, wired through `embed_query`/`embed_documents` with prefix-keyed caching and `EMBEDDINGS_QUERY_PREFIX`/`EMBEDDINGS_DOC_PREFIX` overrides. Presets cite sources: nomic `search_query:`/`search_document:`, qwen3 `Instruct:{task}\nQuery:`, embeddinggemma `task: search result | query: `/`title: none | text: `, bge-m3 none. The original 7.2 run embedded raw text both sides — outside nomic's documented operating condition, so its negative result was confounded.
+- Pulled (311GB free; 2.7GB total): `embeddinggemma` 622MB, `qwen3-embedding:0.6b` 639MB, `bge-m3` 1.2GB — pulled while the other project shared Ollama, no contention problems.
+- Bake-off (`python -m benchmarks.embedding_experiment --verbose`), each model in its documented config:
+  - `nomic-embed-text` (137M): kw 3/8, sem 4/8, hyb 4/8
+  - `embeddinggemma` (308M): kw 3/8, sem 4/8, hyb 4/8
+  - `qwen3-embedding:0.6b`: kw 3/8, sem 4/8, hyb 4/8
+  - `bge-m3` (567M): kw 3/8, sem **5/8**, hyb **5/8** ← best by exactly one case
+  - **All four fail the identical 3 cases** (vocab-gap, synonym-gap, vague-title). Model size/capability does not move the failure class — it is inherent to short-text bi-encoders on adversarial synonym pairs.
+- Prefix re-baseline: nomic *with* documented prefixes scores the same 3/4/4 as without. The confound was real in theory, immaterial in practice on this set — recorded rather than spun.
+- Root-cause finding (most valuable): the only case any model fixes (`description-weight`) is fixed by one keyword weight constant. `description` weight 15→25 puts the keyword baseline at 4/8 — matching the best embedding model, with zero dependencies, zero latency, and no external service. Root cause: descriptions are weighted 15 vs title tokens 40, so "topic in description, distractor in title" loses.
+- Verification:
+  - Backend: `python -m pytest -q` → 168 passed (5 new preset tests incl. prefix-on-the-wire and prefix-aware cache; overlap integration tripwire updated to assert the measured-inversion); `python -m ruff check .` → clean (fixed an IndexError on empty doc_prefix in the table)
+  - Frontend untouched (benchmark tooling only): checks skipped; dev server HTTP 200
+  - Live: bake-off ran clean end-to-end on 4 models; search shape unchanged; no `.db` written by benchmarks
+  - Secrets: staged leak check empty; no `.env`/creds tracked
+- Verdict: DO NOT wire embeddings into search. Evidence is now 4 models × 2 configurations rather than 1 model × 1 config: the gain is 1–2 cases, never on the gap class that motivated the work, and it is dominated by a free weight fix. Keep `embeddings.py` + the runner + presets (cheap to re-run: `EMBEDDINGS_MODEL=<m> python -m benchmarks.embedding_experiment`) but require a meaningfully larger failure dataset (real traffic) before revisiting. Next step for 7.3 is the weight change, not hybrid ranking.
+- Commit: (this worklog entry pending)

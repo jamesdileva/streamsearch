@@ -10,12 +10,15 @@ import math
 import httpx
 import pytest
 
+from app.config import settings
 from app.models.stream import Stream
 from app.search.embeddings import (
+    MODEL_PRESETS,
     HybridBreakdown,
     OllamaEmbeddings,
     cosine,
     hybrid_rank,
+    preset_for,
     record_text,
 )
 
@@ -62,12 +65,17 @@ def test_record_text_truncated_to_max_chars():
 
 
 class _FakeEmbeddings(OllamaEmbeddings):
-    """Stub embeddings: deterministic tiny vectors keyed by record_text."""
+    """Stub: deterministic vectors keyed by raw text (no prefixes)."""
 
     def __init__(self, by_text: dict[str, list[float]]) -> None:
         self.by_text = by_text
+        self.query_prefix = ""
+        self.doc_prefix = ""
 
-    def embed(self, texts: list[str]) -> list[list[float]]:
+    def embed_query(self, query: str) -> list[float]:
+        return self.by_text[query]
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
         return [self.by_text[t] for t in texts]
 
 
@@ -109,9 +117,9 @@ def test_hybrid_normalizes_flat_scores():
     assert all(r.breakdown.keyword == 0.5 for r in ranked)
 
 
-def test_unknown_text_raises_key_error_in_stub():
+def test_stub_raises_on_unknown_text():
     with pytest.raises(KeyError):
-        _FakeEmbeddings({}).embed(["missing"])
+        _FakeEmbeddings({}).embed_documents(["missing"])
 
 
 def test_bad_server_payload_raises_controlled_error():
@@ -133,11 +141,84 @@ def test_server_error_raises_controlled_error():
         OllamaEmbeddings(client=client).embed(["x"])
 
 
+# --- ModelPreset scaffolding (the 7.2b fix) -------------------------------
+
+
+def test_preset_resolution_by_prefix():
+    assert preset_for("nomic-embed-text").query_prefix == "search_query: "
+    assert preset_for("nomic-embed-text").doc_prefix == "search_document: "
+    assert preset_for("nomic-embed-text:latest").query_prefix == "search_query: "
+    assert preset_for("qwen3-embedding:0.6b").query_prefix.startswith("Instruct:")
+    assert preset_for("qwen3-embedding:0.6b").doc_prefix == ""
+    assert preset_for("embeddinggemma").query_prefix == "task: search result | query: "
+    assert preset_for("embeddinggemma").doc_prefix == "title: none | text: "
+    assert preset_for("bge-m3").query_prefix == ""
+    assert preset_for("bge-m3").doc_prefix == ""
+    assert preset_for("some-unknown-model").query_prefix == ""
+
+
+def test_presets_carry_sources():
+    for preset in MODEL_PRESETS.values():
+        assert preset.source, "every preset must cite its model card"
+
+
+def test_client_applies_documented_prefixes_to_the_wire():
+    bodies: list[dict] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        import json
+
+        payload = json.loads(request.content)
+        bodies.append(payload)
+        return httpx.Response(
+            200, json={"embeddings": [[1.0]] * len(payload["input"])}
+        )
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    embeddings = OllamaEmbeddings(model="embeddinggemma", client=client)
+    embeddings.embed_query("wildfire la")
+    embeddings.embed_documents(["Brush blaze erupts"])
+    assert bodies[0]["input"] == ["task: search result | query: wildfire la"]
+    assert bodies[1]["input"] == ["title: none | text: Brush blaze erupts"]
+
+
+def test_client_cache_is_prefix_aware():
+    calls = {"n": 0}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        import json
+
+        calls["n"] += 1
+        payload = json.loads(request.content)
+        return httpx.Response(
+            200, json={"embeddings": [[1.0]] * len(payload["input"])}
+        )
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    embeddings = OllamaEmbeddings(model="embeddinggemma", client=client)
+    embeddings.embed_query("same")
+    embeddings.embed_documents(["same"])
+    # Same raw text, different roles -> two distinct cache entries.
+    assert calls["n"] == 2
+    assert embeddings.embed_query("same") is embeddings.embed_query("same")
+    assert calls["n"] == 2  # cached afterwards
+
+
+def test_env_overrides_beat_presets(monkeypatch):
+    monkeypatch.setattr(settings, "embeddings_query_prefix", "Q: ")
+    monkeypatch.setattr(settings, "embeddings_doc_prefix", "D: ")
+    e = OllamaEmbeddings(model="nomic-embed-text", client=httpx.Client())
+    assert e.query_prefix == "Q: "
+    assert e.doc_prefix == "D: "
+    monkeypatch.setattr(settings, "embeddings_query_prefix", None)
+    monkeypatch.setattr(settings, "embeddings_doc_prefix", None)
+
+
 @REQUIRES_OLLAMA
 def test_real_model_returns_dense_vectors_and_caches():
     embeddings = OllamaEmbeddings()
-    first = embeddings.embed(["wildfire live"])
-    second = embeddings.embed(["wildfire live"])
+    first = embeddings.embed_documents(["wildfire live"])
+    second = embeddings.embed_documents(["wildfire live"])
     assert len(first) == 1 and len(first[0]) > 64
     assert first[0] is second[0]  # cached, not recomputed
 

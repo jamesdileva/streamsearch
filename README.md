@@ -12,7 +12,11 @@
 
 ## Status
 
-Sprint 7.1 done — keyword-insufficiency benchmark (`backend/benchmarks/failure_dataset.py`, runnable via `python -m benchmarks.failure_dataset`): 5 adversarial gap cases fail as documented (vocabulary/synonym gaps, description weight, vague titles, phrase-vs-meaning) while 3 controls pass — motivating a 7.2 embedding prototype measured on this same set, never a production decision yet. Dual-platform live verification **deferred** until both credentials exist. To smoke-test once you have them:
+Sprint 7.1 done — keyword-insufficiency benchmark (`backend/benchmarks/failure_dataset.py`, run via `python -m benchmarks.failure_dataset`): 5 adversarial gap cases fail as documented while 3 controls pass.
+
+Sprint 7.2b done — embedding bake-off (`python -m benchmarks.embedding_experiment`): 4 local models, keyword 3/8 → semantic 4–5/8 with identical failures across 137M–567M models (bge-m3 best at 5/8, one case). Key finding: the only case semantics fixed is solvable by keyword weight `description` 15→25 (keyword baseline 3/8 → 4/8, free). **Verdict: do NOT wire embeddings into search.**
+
+Dual-platform live verification **deferred** until both credentials exist. To smoke-test once you have them:
 
 ```powershell
 # backend/.env (never commit it):

@@ -34,6 +34,9 @@ class Settings:
     # never calls it; 7.3 decides if it ever should).
     ollama_host: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")
     embeddings_model: str = os.getenv("EMBEDDINGS_MODEL", "nomic-embed-text")
+    # None = use the model's documented preset (app/search/embeddings.py).
+    embeddings_query_prefix: str | None = os.getenv("EMBEDDINGS_QUERY_PREFIX")
+    embeddings_doc_prefix: str | None = os.getenv("EMBEDDINGS_DOC_PREFIX")
     cors_origins: list[str] = _cors_origins()
 
 

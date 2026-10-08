@@ -420,3 +420,21 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Backend untouched (no contract change): checks skipped
   - Secrets: staged leak check empty; no `.env`/creds tracked
 - Note: remaining responsive fidelity (44px targets on a real touch device, dark-mode readability of `#ff6a5c`) is inherently visual and stays a manual check — the CSS + components are asserted, the pixels are not.
+- Commit: `1ff8ce7 feat: sprint 8.3 mobile/responsive pass (...)` (+ merge `ca18eea`)
+
+## 2026-10-08 — Sprint 9.1 Kick Feasibility (research only, no adapter)
+
+- Sprint: 9.1 (Goal: go/no-go decision backed by current technical information)
+- Branch: `feat/9-1-kick-feasibility`
+- What: `docs/kick-feasibility.md` — a decision doc, not code. No adapter written (that is 9.2, and it needs credentials).
+- Key findings:
+  - Kick ships an **official Public API** (`api.kick.com`, `docs.kick.com`, KickEngineering/KickDevDocs, Apache-2.0 OpenAPI) — legitimate documented access, no scraping required.
+  - **No text search over stream titles** (same structural limit as Twitch Helix); discovery must be category-mediated: `GET /public/v1/categories?q={search word}` (q required) → `GET /public/v2/livestreams?category_id=...` (≤25 ids, ≤25 languages, limit ≤1000, cursor pagination). Fallback to unfiltered top-live.
+  - `/public/v1/users/livestreams` (≤100 broadcaster user ids) gives a clean re-verify path for the Sprint 4.3 refresh contract.
+  - `GET /public/v1/channels?slug=` returns `stream.{is_live, viewer_count, start_time, language, thumbnail, url, custom_tags, is_mature}` — everything the normalized model needs except geo, which is absent from the entire API.
+  - Auth: **App Access Token via client_credentials** at `id.kick.com/oauth/token`; livestreams/categories need no user scopes — same pattern as the Twitch adapter. Requires registering an app in the Kick dev portal (credentials gate).
+  - Rate limits exist and are enforced with 429; **exact numbers not published** — to be discovered empirically with a conservative budget at implementation.
+- **Verdict: GO** for Sprint 9.2, gated on credentials exactly like Twitch. Playback embed details (player URL / parent-domain restriction) and mature-content policy (`is_mature` present per stream) are the two open items to settle during implementation; recommended default is to omit mature streams.
+- Non-goals (deferred): the adapter itself (9.2); live verification until credentials exist; mature-content policy decision (flagged, not made).
+- Verification: none applicable — research/documentation only, no code changed. `git status` confirms no source touched.
+- Commit: (this worklog entry pending)

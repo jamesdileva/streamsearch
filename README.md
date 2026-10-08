@@ -36,7 +36,7 @@ python -m uvicorn app.main:app --reload
 # &has_location=true — filters combine with the query server-side.
 ```
 
-See `docs/sprint-roadmap.md` (next: 9.1 Kick feasibility).
+Sprint 9.1 done — Kick feasibility: **GO** (official Public API, `categories?q=` text search then `livestreams?category_id=`, no scraping; App Access Token via client_credentials; no geo fields; 429 rate limits with unpublished numbers). Two open items for 9.2: embed parent-domain and `is_mature` policy (recommend omitting). See `docs/kick-feasibility.md` and `docs/sprint-roadmap.md` (next: 9.2 Kick adapter).
 
 ## Target stack
 

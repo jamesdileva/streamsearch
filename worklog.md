@@ -301,4 +301,18 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Frontend untouched: checks skipped; live boot + search shape unchanged; smoke `.db` removed after
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
 - Verdict: KEEP OUT of production. No threshold separates city-word overlap from topic-word overlap on short titles — that needs lexical/semantic equivalence (fire≈wildfire), i.e. real-data + semantic work in 7.x. Deterministic grouping is fine for obvious cases but untrustworthy exactly where it matters (concurrent same-city events). Revisit with real data; do not tune further on fixtures.
-- Commit: `ffa63bd feat: sprint 6.3 event clustering experiment (...)` (+ this worklog entry pending)
+- Commit: `ffa63bd feat: sprint 6.3 event clustering experiment (...)` (+ `35078cf docs: worklog sprint 6.3 with verdict`, merge `c9941f5`)
+
+## 2026-10-08 — Sprint 7.1 Failure Dataset
+
+- Sprint: 7.1 (Goal: determine whether keyword search is actually insufficient)
+- Branch: `feat/7-1-failure-dataset`
+- What: `backend/benchmarks/failure_dataset.py` (8 hand-labeled cases + `evaluate` mirroring the service + `summarize`/`report`; runnable via `python -m benchmarks.failure_dataset`); `tests/test_failure_dataset.py` tripwires (controls must pass, gaps must fail exactly as recorded, classes known, counts pinned)
+- Non-goals (deferred): embedding prototype (7.2); production semantics (never on this evidence alone); real-traffic failure mining (needs traffic)
+- Verification:
+  - Benchmark output: 5 FAIL as documented (vocabulary-gap, synonym-gap, description-weight, vague-title, phrase-vs-meaning) + 3 controls PASS → `passed=3 failed=5`
+  - Backend: `python -m pytest -q` → 151 passed (4 new tripwires); `python -m ruff check .` → clean (fixed cp1252 console crash: ASCII-only report)
+  - Frontend untouched (evaluation tooling only): checks skipped; live boot + search shape unchanged; smoke `.db` removed after
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- Verdict: YES, keyword search is insufficient ON ADVERSARIAL CASES — which justifies a 7.2 prototype measured against this same set (must fix gaps without regressing controls), not a production decision. Representative-traffic measurement still owed once real queries exist.
+- Commit: `498669d feat: sprint 7.1 keyword failure dataset (...)` (+ this worklog entry pending)

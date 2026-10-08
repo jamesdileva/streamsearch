@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 8.3 done — mobile/responsive pass: fluid `.app-main` shell (fixed 1126px frame removed), `pointer: coarse` touch targets ≥44px, compact ≤640px cards + full-width actions, `WatchModal` full-screen embed player (esc/backdrop/focus-restore, scroll lock, strict referrer policy), live-red now themed via `--live` so it's readable on dark. Dark theme itself already followed `prefers-color-scheme` from Sprint 0.1 — no toggle added (OS-driven is the intended behaviour). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 9.1 done — Kick feasibility researched in `docs/kick-feasibility.md`: **GO** for 9.2 (official Public API — `categories?q=` text search then `livestreams?category_id=`, no scraping needed; App Access Token via client_credentials; no geo fields; 429 rate limits with unpublished numbers). Two open items for 9.2: embed parent-domain and `is_mature` policy (recommend omitting). No adapter code written yet — 9.2 needs `KICK_CLIENT_ID/SECRET`.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

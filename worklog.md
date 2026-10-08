@@ -284,4 +284,21 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - All pre-existing suites unaffected (fixtures correctly never collapse); frontend untouched (additive response field only): checks skipped
   - Live: `?q=storm` → count 3, removed 0 (no false collapse in production path); smoke `.db` removed after
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
-- Commit: `08b0cb7 feat: sprint 6.2 basic duplicate detection (...)` (+ this worklog entry pending)
+- Commit: `08b0cb7 feat: sprint 6.2 basic duplicate detection (...)` (+ `55459c7 docs: worklog sprint 6.2`, merge `fadd242`)
+
+## 2026-10-08 — Sprint 6.3 Event Clustering Experiment
+
+- Sprint: 6.3 (Goal: test whether streams can be grouped around an ongoing event)
+- Branch: `feat/6-3-clustering-experiment`
+- What: `app/search/clustering.py` (EXPERIMENTAL, unwired): union-find over `title_link AND (location_link OR time_link) AND NOT time_veto`; stopword-filtered title Jaccard (doubles as shared-entity signal); topic_guess + location notes per cluster; no semantic similarity (stays behind the 7.1 gate)
+- Non-goals (deferred): production wiring (explicitly not done); semantic embeddings; event endpoints/UI
+- Verification (fixture set: wildfire trio, concert pair, 3 same-city distractors, edge pairs):
+  - Backend: `python -m pytest -q` → 147 passed (8 new); `python -m ruff check .` → clean (fixed SIM905 list literal)
+  - Measured at 0.4: concert pair ✓ + wildfire pair ✓, zero cross-story merges — BUT same-city traffic distractor joins the wildfire cluster (my hand analysis wrongly predicted exclusion; city-word overlap clears 0.4 on short titles)
+  - Measured at 0.6: FP gone — along with both true groups (total fragmentation)
+  - Statewide roundup stays separate at both points (ambiguous by design: region-vs-city wording + fire/wildfire lexical gap)
+  - Same-title pair clusters; 3-day-apart rebroadcasts split via veto; stopwords pinned ≤30
+  - Frontend untouched: checks skipped; live boot + search shape unchanged; smoke `.db` removed after
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- Verdict: KEEP OUT of production. No threshold separates city-word overlap from topic-word overlap on short titles — that needs lexical/semantic equivalence (fire≈wildfire), i.e. real-data + semantic work in 7.x. Deterministic grouping is fine for obvious cases but untrustworthy exactly where it matters (concurrent same-city events). Revisit with real data; do not tune further on fixtures.
+- Commit: `ffa63bd feat: sprint 6.3 event clustering experiment (...)` (+ this worklog entry pending)

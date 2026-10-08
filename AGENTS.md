@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 6.3 done — clustering experiment in `app/search/clustering.py` (UNWIRED; measured: 0.4 merges same-city distractor, 0.6 fragments true groups — stays out of production, revisit with real data + semantics in 7.x). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 7.1 done — failure dataset in `backend/benchmarks/failure_dataset.py` (5 pinned keyword gaps + 3 controls; `python -m benchmarks.failure_dataset`; tripwire tests fail loudly if any case flips). Verdict: adversarial gaps justify a 7.2 prototype, not production semantics. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

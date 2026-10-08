@@ -12,7 +12,7 @@
 
 ## Status
 
-Sprint 5.3 done — unified cross-platform results (one ranked set, no platform term in scoring; server-side `platform` / `sort=relevance|newest|viewers` / `has_location` params; `SearchFilters` UI with platform options derived from live results; filter variants get separate cache entries). Dual-platform live verification **deferred** until both credentials exist. To smoke-test once you have them:
+Sprint 6.1 done — event data model (`Event`: topic, location, detected_at, active_until, related `(platform, platform_stream_id)` refs; SQLite `events` + `event_streams`; manual create/get/extend/close ops, no clustering, no endpoints yet). Dual-platform live verification **deferred** until both credentials exist. To smoke-test once you have them:
 
 ```powershell
 # backend/.env (never commit it):
@@ -30,7 +30,7 @@ python -m uvicorn app.main:app --reload
 # &has_location=true — filters combine with the query server-side.
 ```
 
-See `docs/sprint-roadmap.md` (next: 6.1 event vs. stream data model).
+See `docs/sprint-roadmap.md` (next: 6.2 basic duplicate detection).
 
 ## Target stack
 

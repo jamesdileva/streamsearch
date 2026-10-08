@@ -315,4 +315,20 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Frontend untouched (evaluation tooling only): checks skipped; live boot + search shape unchanged; smoke `.db` removed after
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
 - Verdict: YES, keyword search is insufficient ON ADVERSARIAL CASES — which justifies a 7.2 prototype measured against this same set (must fix gaps without regressing controls), not a production decision. Representative-traffic measurement still owed once real queries exist.
-- Commit: `498669d feat: sprint 7.1 keyword failure dataset (...)` (+ this worklog entry pending)
+- Commit: `498669d feat: sprint 7.1 keyword failure dataset (...)` (+ `0e1891d docs: worklog sprint 7.1 with verdict`, merge `e77f733`)
+
+## 2026-10-08 — Sprint 7.2 Embedding Search Prototype (unwired)
+
+- Sprint: 7.2 (Goal: compare keyword vs semantic vs hybrid on the 7.1 set)
+- Branch: `feat/7-2-embedding-prototype`
+- What: `app/search/embeddings.py` (Ollama `/api/embed` client — HTTP only, NO torch/transformers dependency — with text cache; `record_text` = title+description+channel; `cosine` clamped; `hybrid_rank` min-max normalizes keyword+semsim and blends at keyword_weight=0.5); `benchmarks/embedding_experiment.py` (runner replaying the 7.1 set three ways, `python -m benchmarks.embedding_experiment`); `OLLAMA_HOST`/`EMBEDDINGS_MODEL` config. Production search untouched — this module is never called by it.
+- Model chosen: `nomic-embed-text` (137M, 768-dim, 274MB) — smallest true embedding model already installed (`phi4-mini`/`qwen3.5:4b` are chat models without reliable embed endpoints).
+- Verification:
+  - Experiment (run twice, reproducible): keyword=3/8 semantic=4/8 hybrid=4/8. Only `description-weight` flips; all 3 controls held (no regression); vocab-gap, synonym-gap, vague-title, phrase-vs-meaning all still fail.
+  - Margin check: `record_text`-above-query sims are 0.63–0.69 vs keyword-literal matches at 0.71–0.84 — the model ranks *lexically-similar* records above *semantically-relevant* ones, which is the worst possible inversion for hybrid blending.
+  - Backend: `python -m pytest -q` → 163 passed (12 new: cosine/clamp/record_text, fake-vector hybrid blends + flat-normalization + weight control, mocked client error paths, plus Ollama-guarded integration tests incl. a tripwire that semantic top is the wrong record); `python -m ruff check .` → clean
+  - Frontend untouched (no contract changes): checks skipped; dev server HTTP 200; live search shape unchanged; smoke `.db` removed after
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- Verdict: NOT ADOPTED for production. Negative result is well-supported: (a) +1/8 with zero movement on the gap class that motivated the experiment; (b) semantic scoring actively inverts relevance vs lexically-similar records; (c) description semantics aren't even used by 3.1's keyword signal yet — fixing that is much cheaper.
+- Cheapest next step when wanted (NOT now): swap one of your existing chat models' embed endpoints or pull a larger embedder (e.g. `mxbai-embed-large`) and re-run `python -m benchmarks.embedding_experiment` — same command, same data, no code change. Decide after that.
+- Commit: (this worklog entry pending)

@@ -30,6 +30,10 @@ class Settings:
     refresh_interval_seconds: int = int(os.getenv("REFRESH_INTERVAL_SECONDS", "900"))
     refresh_batch_size: int = int(os.getenv("REFRESH_BATCH_SIZE", "10"))
     refresh_prune_days: int = int(os.getenv("REFRESH_PRUNE_DAYS", "30"))
+    # Embedding prototype (Sprint 7.2, experimental — production search
+    # never calls it; 7.3 decides if it ever should).
+    ollama_host: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+    embeddings_model: str = os.getenv("EMBEDDINGS_MODEL", "nomic-embed-text")
     cors_origins: list[str] = _cors_origins()
 
 

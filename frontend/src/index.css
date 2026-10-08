@@ -8,6 +8,8 @@
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
+  /* Live indicator red; the dark block below lifts it for dark surfaces. */
+  --live: #d92d20;
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
@@ -43,23 +45,36 @@
     --social-bg: rgba(47, 48, 58, 0.5);
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+    /* Same hue, lifted for a dark background so LIVE stays readable. */
+    --live: #ff6a5c;
   }
 }
 
+/* Sprint 0.1 scaffold used a fixed 1126px frame that left the results grid
+   stranded in empty space; 8.3 made the shell fluid and let content decide. */
 #root {
-  width: 1126px;
-  max-width: 100%;
+  width: 100%;
   margin: 0 auto;
   text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+}
+
+.app-main {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .app-main {
+    padding: 16px 12px 40px;
+  }
 }
 
 body {
@@ -209,7 +224,7 @@ code {
 }
 
 .live-status--live {
-  color: #d92d20;
+  color: var(--live);
 }
 
 .live-status--ended,
@@ -242,10 +257,13 @@ code {
 
 .stream-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.stream-actions a {
+.stream-actions a,
+.stream-actions button {
+  font: inherit;
   font-size: 14px;
   padding: 8px 14px;
   border: 1px solid var(--accent-border);
@@ -254,6 +272,50 @@ code {
   color: var(--text-h);
   text-decoration: none;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Sprint 8.3 full-screen playback. */
+.watch-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.watch-modal {
+  position: relative;
+  width: min(100%, 1100px);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.watch-frame {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  background: #000;
+}
+
+.watch-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-h);
+  cursor: pointer;
 }
 
 .stream-report {
@@ -307,7 +369,28 @@ code {
   background: var(--bg);
 }
 
-@media (max-width: 480px) {
+/* Sprint 8.3: touch devices get real tap targets (≥44px) and compact cards.
+   The report form's radios stack full-width so nothing is a sub-16px hit. */
+@media (pointer: coarse) {
+  .search-bar button,
+  .search-filters select,
+  .stream-actions a,
+  .stream-actions button,
+  .watch-close,
+  .stream-report button {
+    min-height: 44px;
+  }
+
+  .stream-report button {
+    width: 100%;
+  }
+
+  .search-filters select {
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 640px) {
   .search-bar {
     flex-direction: column;
   }
@@ -318,5 +401,41 @@ code {
 
   .results-list {
     grid-template-columns: 1fr;
+  }
+
+  .watch-modal {
+    width: 100%;
+  }
+
+  .stream-card {
+    border-radius: 6px;
+  }
+
+  .stream-body {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .stream-title {
+    font-size: 15px;
+  }
+
+  .stream-channel,
+  .stream-meta,
+  .stream-actions a,
+  .stream-actions button,
+  .stream-report {
+    font-size: 13px;
+  }
+
+  .stream-actions a,
+  .stream-actions button {
+    flex: 1;
+    text-align: center;
+    padding: 10px 12px;
+  }
+
+  .results-list {
+    gap: 10px;
   }
 }

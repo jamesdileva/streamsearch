@@ -6,7 +6,13 @@ import ReportButton from './ReportButton';
 
 // Restrained card: every field comes from the normalized Stream model.
 // Anything the platform didn't provide is simply omitted ("where available").
-export default function StreamCard({ stream }: { stream: Stream }) {
+export default function StreamCard({
+  stream,
+  onWatch,
+}: {
+  stream: Stream;
+  onWatch: (stream: Stream) => void;
+}) {
   const details: ReactNode[] = [];
   if (stream.started_at) {
     const when = new Date(stream.started_at);
@@ -72,13 +78,14 @@ export default function StreamCard({ stream }: { stream: Stream }) {
         {(canWatch || stream.source_url) && (
           <div className="stream-actions">
             {canWatch && (
-              <a
-                href={stream.embed_url as string}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                type="button"
+                className="watch-button"
+                data-testid="watch-button"
+                onClick={() => onWatch(stream)}
               >
                 Watch
-              </a>
+              </button>
             )}
             {stream.source_url && (
               <a href={stream.source_url} target="_blank" rel="noreferrer">

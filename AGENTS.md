@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 8.2 done — map experiment, **decision: map does NOT ship** (measured 0% geo coverage: YouTube is the only coordinate source and rarely reports it; Twitch never does). Prototype kept as instrumentation in `app/search/geo.py` + `GET /api/geo` (markers/clusters/coverage, confidence tiers `exact`/`derived`/unlocated, gazetteer is documented-as-guessing). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 8.3 done — mobile/responsive pass: fluid `.app-main` shell (fixed 1126px frame removed), `pointer: coarse` touch targets ≥44px, compact ≤640px cards + full-width actions, `WatchModal` full-screen embed player (esc/backdrop/focus-restore, scroll lock, strict referrer policy), live-red now themed via `--live` so it's readable on dark. Dark theme itself already followed `prefers-color-scheme` from Sprint 0.1 — no toggle added (OS-driven is the intended behaviour). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

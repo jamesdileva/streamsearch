@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 6.2 done — dedup in `app/search/dedup.py` (same-id; same-channel + title≥0.8 + 6h window; cross-channel never; best-ranked survives; `duplicates_removed` on response, index keeps sightings). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 6.3 done — clustering experiment in `app/search/clustering.py` (UNWIRED; measured: 0.4 merges same-city distractor, 0.6 fragments true groups — stays out of production, revisit with real data + semantics in 7.x). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

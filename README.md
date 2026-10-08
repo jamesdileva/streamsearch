@@ -12,7 +12,7 @@
 
 ## Status
 
-Sprint 6.2 done — basic duplicate detection (`app/search/dedup.py`: same-id always; same-channel + ≥0.8 title Jaccard + 6h start window; different channels never collapse; best-ranked survives; response-only via `duplicates_removed`, index keeps all sightings). Dual-platform live verification **deferred** until both credentials exist. To smoke-test once you have them:
+Sprint 6.3 done — event-clustering experiment (`app/search/clustering.py`, NOT wired into search): union-rule grouping measured on fixtures — clear cases group with zero cross-story merges, but same-city distractors merge at 0.4 while 0.6 fragments everything, so simple clustering stays out of production pending real-data + semantic work (7.x). Dual-platform live verification **deferred** until both credentials exist. To smoke-test once you have them:
 
 ```powershell
 # backend/.env (never commit it):
@@ -30,7 +30,7 @@ python -m uvicorn app.main:app --reload
 # &has_location=true — filters combine with the query server-side.
 ```
 
-See `docs/sprint-roadmap.md` (next: 6.3 event clustering experiment).
+See `docs/sprint-roadmap.md` (next: 7.1 failure dataset).
 
 ## Target stack
 

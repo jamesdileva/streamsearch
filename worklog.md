@@ -244,4 +244,17 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Live: no-cred smoke shape unchanged (fake + fake-twitch, 3 ranked); smoke `.db` removed after
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
 - Deferred dual-platform procedure (needs both keys): set `YOUTUBE_API_KEY` + `TWITCH_CLIENT_ID/SECRET` in `backend/.env` (+ `TWITCH_EMBED_PARENT` for production host), restart, `GET /api/search?q=` for news/gaming/concert → expect `youtube` + `twitch` records in one ranked set, each verifiably live via `source_url`; confirm neither platform dominates every query
-- Commit: `3a95837 feat: sprint 5.2 twitch discovery (...)` (+ this worklog entry pending)
+- Commit: `3a95837 feat: sprint 5.2 twitch discovery (...)` (+ `4017aaa docs: worklog sprint 5.2`, merge `5ca389b`)
+
+## 2026-10-08 — Sprint 5.3 Unified Cross-Platform Results
+
+- Sprint: 5.3 (Goal: stop thinking in platform columns)
+- Branch: `feat/5-3-unified-results`
+- What: server-side `platform` / `sort=relevance|newest|viewers` / `has_location` params (unknown sort → 422; unknown platform → empty, not error; ended-last partition kept across sorts; nulls sort last); `sort_streams` in scoring; filter-aware cache keys; `SearchFilters` UI (platform options derived from results, never hardcoded; auto-refetch on change, none before first search) + `lib/filters.ts`
+- Non-goals (deferred): dual-platform live proof until both credentials exist; richer 8.1 filters (language etc.); per-platform status (10.1)
+- Verification:
+  - Backend: `python -m pytest -q` → 121 passed (8 new: no-domination tie, platform filter incl. case/unknown, newest/viewers ordering + nulls/ended placement, location filter, key separation, API params, unknown-sort 422); `python -m ruff check .` → clean
+  - Frontend: `npm run typecheck` OK; `npm run lint` clean (moved filter types to `lib/filters.ts` after Fast Refresh warning); `npm run test` → 33 passed (3 SearchFilters + 3 App filter tests + updated call assertions); `npm run build` OK; dev server → HTTP 200
+  - Live: mixed `?q=storm` → 3 records fake+twitch; `&platform=twitch` → 2 twitch-only; `&sort=viewers` → `[5231, None, None]`; bad sort → 422 envelope; smoke `.db` removed after
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- Commit: `5106f4d feat: sprint 5.3 unified cross-platform results (...)` (+ this worklog entry pending)

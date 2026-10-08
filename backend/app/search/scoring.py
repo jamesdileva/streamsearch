@@ -32,7 +32,11 @@ _FRESHNESS_SCORE = {"fresh": 1.0, "aging": 0.5, "stale": 0.0, "ended": 0.0}
 class Weights:
     title_exact: float = 100.0
     title_token: float = 40.0
-    description: float = 15.0
+    # Raised 15 → 25 in Sprint 7.3 on measured evidence: at 15 a title
+    # token (40) outranked a topic living in a description, which was the
+    # only case the 7.2b embedding bake-off fixed. One constant reproduced
+    # that gain (keyword baseline 3/8 → 4/8) with no model dependency.
+    description: float = 25.0
     tag_category: float = 15.0
     location: float = 50.0
     freshness: float = 20.0

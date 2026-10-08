@@ -12,9 +12,11 @@
 
 ## Status
 
-Sprint 7.1 done — keyword-insufficiency benchmark (`backend/benchmarks/failure_dataset.py`, run via `python -m benchmarks.failure_dataset`): 5 adversarial gap cases fail as documented while 3 controls pass.
+Sprint 7.1 done — keyword-insufficiency benchmark (`backend/benchmarks/failure_dataset.py`, run via `python -m benchmarks.failure_dataset`).
 
-Sprint 7.2b done — embedding bake-off (`python -m benchmarks.embedding_experiment`): 4 local models, keyword 3/8 → semantic 4–5/8 with identical failures across 137M–567M models (bge-m3 best at 5/8, one case). Key finding: the only case semantics fixed is solvable by keyword weight `description` 15→25 (keyword baseline 3/8 → 4/8, free). **Verdict: do NOT wire embeddings into search.**
+Sprint 7.2b done — embedding bake-off (`python -m benchmarks.embedding_experiment`): 4 local models, keyword 3/8 → semantic 4–5/8 with identical failures across 137M–567M models (bge-m3 best at 5/8, one case).
+
+Sprint 7.3 done — **hybrid ranking decided: NOT adopted.** The only case semantics fixed is closed instead by keyword weight `description` 15→25. Benchmark now **4/8** (4 controls pass, 4 gaps remain pinned). `embeddings.py` stays experimental and unwired for cheap re-runs.
 
 Dual-platform live verification **deferred** until both credentials exist. To smoke-test once you have them:
 
@@ -34,7 +36,7 @@ python -m uvicorn app.main:app --reload
 # &has_location=true — filters combine with the query server-side.
 ```
 
-See `docs/sprint-roadmap.md` (next: 7.3 hybrid ranking decision).
+See `docs/sprint-roadmap.md` (next: 8.1 search filters).
 
 ## Target stack
 

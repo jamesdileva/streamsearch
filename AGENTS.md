@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 └── .gitignore
 ```
 
-Current state: Sprint 7.2b done — embeddings bake-off (`app/search/embeddings.py`, UNWIRED): 4 local models × 7.1 set, per-model documented prefixes (`ModelPreset` + `EMBEDDINGS_*_PREFIX` overrides). Measured: keyword 3/8 → semantic 4–5/8 with identical failures across 137M–567M models (bge-m3 5/8 best). Key finding: the sole case semantics fixed is solvable by keyword weight `description` 15→25 (keyword baseline 3/8 → 4/8). Verdict: do NOT wire embeddings; re-run the bake-off only if the case set grows meaningfully. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
+Current state: Sprint 7.3 done — hybrid ranking decided NOT adopted (evidence in worklog 7.2b). Keyword weight `description` 15→25 applied (only measured gain, no dependency); benchmark 4/8 with `description-weight` reclassified gap→control; `embeddings.py` remains experimental/unwired, re-run via `EMBEDDINGS_MODEL=<m> python -m benchmarks.embedding_experiment`. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if `ruff`/`uvicorn` shims aren't on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

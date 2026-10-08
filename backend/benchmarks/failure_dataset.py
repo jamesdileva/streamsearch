@@ -82,10 +82,10 @@ CASES: list[Case] = [
             _rec("b", "Launch day parade"),
         ],
         expected_top="a",
-        failure=FailureClass(
-            "description-weight",
-            "topic lives in the description (15) but a title token (40) outranks it",
-        ),
+        # Was a pinned gap (weight 15 lost to a title token's 40). Sprint 7.3
+        # raised description to 25 and fixed it deterministically — moved to
+        # a control by design, since the gap class is now closed without any
+        # semantic retrieval.
     ),
     Case(
         id="vague-title",

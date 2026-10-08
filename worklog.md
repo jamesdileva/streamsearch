@@ -353,4 +353,20 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Live: bake-off ran clean end-to-end on 4 models; search shape unchanged; no `.db` written by benchmarks
   - Secrets: staged leak check empty; no `.env`/creds tracked
 - Verdict: DO NOT wire embeddings into search. Evidence is now 4 models × 2 configurations rather than 1 model × 1 config: the gain is 1–2 cases, never on the gap class that motivated the work, and it is dominated by a free weight fix. Keep `embeddings.py` + the runner + presets (cheap to re-run: `EMBEDDINGS_MODEL=<m> python -m benchmarks.embedding_experiment`) but require a meaningfully larger failure dataset (real traffic) before revisiting. Next step for 7.3 is the weight change, not hybrid ranking.
+- Commit: `61fcd2d feat: sprint 7.2b embedding bake-off (...)` (+ merge `1fec344`)
+
+## 2026-10-08 — Sprint 7.3 Hybrid Ranking (decision: NOT adopted)
+
+- Sprint: 7.3 (Goal: combine deterministic + semantic ranking *if justified*)
+- Branch: `feat/7-3-hybrid-ranking-decision`
+- Decision: hybrid ranking is **NOT** adopted. The 7.2b bake-off showed semantic retrieval adds 1–2 cases on an adversarial set and never closes the gap class that motivated it, so blending would add an external dependency (Ollama), latency, and failure modes for no measurable benefit. Deterministic ranking stays the only production ranker; `embeddings.py` stays experimental and unwired.
+- What DID ship: `Weights.description` 15 → 25 in `app/search/scoring.py`, the one measured gain from the whole semantic line of work, with a comment citing the evidence. Root cause: a title token (40) outranked a topic living in a description (15).
+- Reclassification (tripwire working as designed): the weight fix flipped the pinned `description-weight` case, failing `test_documented_gaps_fail_as_recorded` exactly as intended. Moved it from gaps to controls in `benchmarks/failure_dataset.py` with a note explaining it was fixed by a weight change, not semantics.
+- Verification:
+  - Benchmark: `python -m benchmarks.failure_dataset` → `passed=4 failed=4` (was 3/5). Controls now 4 (incl. reclassified `description-weight`), gaps still 4 (vocabulary-gap, synonym-gap, vague-title, phrase-vs-meaning) all still failing as recorded.
+  - Backend: `python -m pytest -q` → 168 passed; `python -m ruff check .` → clean. Updated pinned counts (4 controls / 4 gaps / (4,4) summary) and removed `description-weight` from the known-failure-class set.
+  - Frontend: `npm run typecheck` OK; `npm run lint` clean; `npm run test` → 33 passed; `npm run build` OK (no contract change — ranking behaviour only)
+  - Live: `?q=storm` → 3 ranked results, `removed: 0`, distinct scores preserved across platforms; stats consistent; smoke `.db` removed after
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- Deferred: revisit embeddings only with a meaningfully larger **real-traffic** failure dataset; root-cause fixes for the 4 remaining gaps (vocabulary/synonym) would need a lexical-level approach (e.g. small curated synonym map), which is a cheaper next candidate than embeddings.
 - Commit: (this worklog entry pending)

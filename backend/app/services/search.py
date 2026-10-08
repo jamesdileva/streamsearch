@@ -18,6 +18,7 @@ from app.adapters.twitch import TwitchAdapter
 from app.adapters.youtube import YouTubeAdapter
 from app.config import settings
 from app.models.stream import SearchResponse, Stream
+from app.search.dedup import dedupe_streams
 from app.search.location import parse_location
 from app.search.scoring import Weights, rank_streams, sort_streams
 from app.services.cache import CacheStats, SearchCache
@@ -118,9 +119,17 @@ class SearchService:
                 if s.location_text or (s.latitude is not None and s.longitude is not None)
             ]
         ranked = rank_streams(results, text_query, self.weights, parsed.place)
-        ordered = sort_streams(ranked, sort)
-        response = SearchResponse(query=normalized, results=ordered, count=len(ordered))
-        self._store_in_index(ordered)
+        # Collapse obvious duplicates for the response (best-ranked survives);
+        # the index keeps every sighting the platforms reported.
+        deduped, removed = dedupe_streams(ranked)
+        ordered = sort_streams(deduped, sort)
+        response = SearchResponse(
+            query=normalized,
+            results=ordered,
+            count=len(ordered),
+            duplicates_removed=removed,
+        )
+        self._store_in_index(ranked)
         self.cache.put(key, response)
         return response
 

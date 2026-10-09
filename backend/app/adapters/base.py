@@ -8,11 +8,14 @@ from typing import Any
 class BasePlatformAdapter(ABC):
     """Contract all platform adapters must implement.
 
-    Search/business logic must depend on this, never on
-    platform-specific response shapes.
+    `search_quota_cost` is a best-effort estimate of platform quota consumed
+    per search, for observability only (Sprint 10.3). YouTube's real unit
+    cost is the model; request-limited platforms (Twitch, Kick) declare 0
+    because they have no per-request unit budget.
     """
 
     platform: str = "base"
+    search_quota_cost: int = 0
 
     @abstractmethod
     def search(self, query: str) -> list[dict[str, Any]]:

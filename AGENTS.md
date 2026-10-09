@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 â””â”€â”€ .gitignore
 ```
 
-Current state: Sprint 10.2 done - in-memory sliding-window rate limiting (search 60/min, refresh 2/5min, per-peer, X-Forwarded-For deliberately ignored, unknown scopes fail open), query validation (200 chars, control chars, repeated filler) with privacy-safe logging (length + digest, never raw input), and 429/422 envelopes. Auth on /api/refresh is still owed before public exposure. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
+Current state: Sprint 10.3 done - observability: `GET /api/stats` now reports every roadmap metric (searches, cache hits/misses + rate, per-adapter latency/errors + error rate, streams discovered vs indexed, estimated quota units, index staleness `total/live/ended/stale/fresh/unverified`, report volume) via a thread-safe in-process `MetricsRegistry`; adapters declare `search_quota_cost`; a broken report store degrades to -1 instead of breaking the dashboard. Remote alerting still owed. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

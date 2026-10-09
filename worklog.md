@@ -526,3 +526,38 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Secrets: staged leak check empty; no `.env`/creds tracked
 - Known limitation recorded: the limiter is per-process. With multiple uvicorn workers the effective limit multiplies; Redis (or another shared store) is the fix, and stays unjustified until horizontal scaling actually happens.
 - Commit: (this worklog entry pending)
+
+## 2026-10-09 — Sprint 10.3 Observability
+
+- Sprint: 10.3 (Goal: know whether the index is actually healthy)
+- Branch: `feat/10-3-observability`
+- What: `app/services/metrics.py` — thread-safe in-process `MetricsRegistry` tracking all eight
+  roadmap quantities, plus `observability_snapshot()` composing live counters + durable store
+  health. `GET /api/stats` now returns the full dashboard.
+  - searches / cache hits+misses+hit_rate (recorded through the real search path)
+  - per-adapter requests, errors, avg/last latency, last error
+  - `adapter_error_rate` computed over **all attempts** (success + failure) so a total outage
+    reads 1.0, not a misleading 0.0 — a real bug found while testing
+  - streams_discovered vs streams_indexed — discovery is a fresh insert (`first_seen_at ==
+    last_seen_at`), a re-sighting is not; found and fixed during verification
+  - estimated_quota_units from adapters' new `search_quota_cost` declaration (YouTube 101 =
+    search.list 100 + videos.list 1; Twitch/Kick 0, request-limited rather than quota-limited)
+  - index staleness: total / live / ended / stale / fresh / unverified / unknown
+  - report volume; a broken report store degrades to `-1` instead of breaking the dashboard
+- Non-goals (deferred): UI dashboard (a JSON endpoint is inspectable and the product stays
+  discovery-focused), time-series/Prometheus/OTel, remote alerting.
+- Verification:
+  - Backend: `python -m pytest -q` → **238 passed** (11 new in `test_observability.py`, each
+    asserted through the real search path rather than in isolation: searches+cache, latency,
+    failures, discovered-vs-indexed, quota estimate, request-limited platforms, stale/fresh
+    index buckets, report volume, composite snapshot, registry reset, and a degraded report
+    store). The stats-shape test in `test_cache.py` was rewritten to assert the new payload.
+  - Live dashboard inspection (the roadmap's verification): 2 searches + 1 report →
+    `searches: 2, api_requests: 4, adapter_requests: 4, errors: 0, streams_discovered: 3,
+    streams_indexed: 6, index {total/live/fresh: 3, stale/unverified/ended: 0}, reports: 1`,
+    per-adapter latency populated. Every number internally consistent.
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- Known limits recorded: counters are per-process (same caveat as the rate limiter); latency
+  includes only synchronous adapter time, not HTTP/SQLite waits; quota is an estimate from
+  documented rates, not observed platform accounting.
+- Commit: (this worklog entry pending)

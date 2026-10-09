@@ -120,15 +120,43 @@ def test_expired_entries_purged_on_write():
     assert cache.size == 1  # first entry expired and purged by the second put
 
 
-def test_stats_endpoint_shape():
+def test_stats_endpoint_reports_all_roadmap_metrics():
+    from app.services.metrics import get_metrics
+
+    get_metrics().reset()
     body = client.get("/api/stats").json()
-    assert set(body) == {
+
+    # Live request/cache/latency block.
+    live = body["live"]
+    for key in (
+        "searches",
         "cache_hits",
         "cache_misses",
-        "adapter_calls",
+        "cache_hit_rate",
+        "api_requests",
+        "estimated_quota_units",
+        "adapter_requests",
         "adapter_errors",
-        "cache_size",
-        "index_records",
-        "index_live",
-    }
-    assert all(isinstance(v, int) for v in body.values())
+        "adapter_error_rate",
+        "streams_discovered",
+        "streams_indexed",
+        "uptime_seconds",
+        "adapters",
+    ):
+        assert key in live, key
+
+    # Durable store health + report volume.
+    for key in ("total", "live", "ended", "stale", "fresh", "unverified", "unknown"):
+        assert key in body["index"], key
+    assert body["reports"]["count"] >= 0
+
+    # Per-adapter latency/error breakdown with the expected fields.
+    for entry in live["adapters"].values():
+        assert {
+            "requests",
+            "errors",
+            "avg_latency_ms",
+            "last_latency_ms",
+            "last_error",
+        } <= set(entry)
+

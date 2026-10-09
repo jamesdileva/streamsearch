@@ -52,6 +52,8 @@ def _to_int(value: Any) -> int | None:
 
 class YouTubeAdapter(BasePlatformAdapter):
     platform = "youtube"
+    # search.list = 100 units + videos.list = 1 unit (documented rates).
+    search_quota_cost = 101
 
     def __init__(
         self,

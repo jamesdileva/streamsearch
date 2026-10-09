@@ -38,7 +38,7 @@ python -m uvicorn app.main:app --reload
 
 Sprint 10.2 done - rate limiting + abuse protection: in-memory sliding-window limiter (search 60/min, refresh 2/5min, per-peer, X-Forwarded-For deliberately ignored, unknown scopes fail open), query validation (200 chars, control chars, repeated filler) with privacy-safe logging (length + digest, never raw input), and 429/422 error envelopes.
 
-Sprint 10.3 done - observability: `GET /api/stats` reports every roadmap metric — searches, cache hits/misses + rate, per-adapter latency/errors + error rate, streams discovered vs indexed, estimated quota units, index staleness (total/live/ended/stale/fresh/unverified), and report volume — via a thread-safe in-process `MetricsRegistry`. Remote alerting is still owed. Next: `docs/sprint-roadmap.md` (11.1 source and content handling review).
+Sprint 11.1 done — content boundaries documented in `docs/content-boundaries.md`, each claim marked enforced or gap, with tests pinning both. Enforced: source attribution, embed gating, no-proxy links, metadata-only storage. Gaps: no takedown/removal path, `is_mature` captured but not surfaced, reports advisory only. Next: `docs/sprint-roadmap.md` (11.2 search abuse controls).
 
 ## Target stack
 

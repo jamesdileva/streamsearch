@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 â””â”€â”€ .gitignore
 ```
 
-Current state: Sprint 10.3 done - observability: `GET /api/stats` now reports every roadmap metric (searches, cache hits/misses + rate, per-adapter latency/errors + error rate, streams discovered vs indexed, estimated quota units, index staleness `total/live/ended/stale/fresh/unverified`, report volume) via a thread-safe in-process `MetricsRegistry`; adapters declare `search_quota_cost`; a broken report store degrades to -1 instead of breaking the dashboard. Remote alerting still owed. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
+Current state: Sprint 11.1 done - content boundaries documented in `docs/content-boundaries.md` with each claim marked enforced or gap. Enforced: source attribution, embed gating, no-proxy links, metadata-only storage (no media bytes anywhere). Gaps recorded honestly: no takedown/removal path exists (`DELETE` is absent — pruning of ended records is the only removal), `is_mature` is captured but not surfaced (policy decision open), reports are advisory only. Boundary tests in `tests/test_boundaries.py` pin these claims so the docs can't silently drift. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

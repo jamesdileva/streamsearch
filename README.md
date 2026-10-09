@@ -36,7 +36,7 @@ python -m uvicorn app.main:app --reload
 # &has_location=true — filters combine with the query server-side.
 ```
 
-Sprint 10.1 done - platform failure isolation: one broken platform degrades its own status entry while the rest still return results (per-adapter try/except, `PlatformStatus` on every response, degraded responses not cached, 502 only when every platform failed); `PlatformNotice` warns in the UI. Next: `docs/sprint-roadmap.md` (10.2 rate limiting).
+Sprint 10.2 done - rate limiting + abuse protection: in-memory sliding-window limiter (search 60/min, refresh 2/5min, per-peer, X-Forwarded-For deliberately ignored, unknown scopes fail open), query validation (200 chars, control chars, repeated filler) with privacy-safe logging (length + digest, never raw input), and 429/422 error envelopes. Auth on /api/refresh is still owed before public exposure. Next: `docs/sprint-roadmap.md` (10.3 observability).
 
 ## Target stack
 

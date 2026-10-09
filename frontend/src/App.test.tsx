@@ -325,3 +325,17 @@ test('partial outage shows a notice but keeps healthy results', async () => {
     'Showing results from 1 of 2 platforms',
   );
 });
+
+test('rate-limit message is surfaced instead of a bare status code', async () => {
+  vi.spyOn(api, 'searchStreams').mockRejectedValue(
+    new Error('too many requests — slow down and retry shortly'),
+  );
+  render(<App />);
+  submitQuery('wildfire');
+  await waitFor(() =>
+    expect(screen.getByTestId('search-error')).toHaveTextContent(
+      'too many requests',
+    ),
+  );
+  expect(screen.getByTestId('search-error')).not.toHaveTextContent('429');
+});

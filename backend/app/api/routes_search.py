@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.adapters.base import AdapterError
+from app.api.deps import rate_limit, validated_query
 from app.models.stream import SearchResponse
 from app.search.scoring import SORTS
 from app.services.search import SearchService, get_search_service
@@ -20,13 +21,11 @@ def search(
     sort: str = "relevance",
     has_location: str = "",
     language: str = "",
-    # Validated in-body (not via Query ge/le) so failures come back in the
-    # same {"error": {...}} envelope as every other search error.
     min_viewers: int = 0,
     service: SearchService = Depends(get_search_service),  # noqa: B008 - FastAPI idiom
+    _limited: None = Depends(rate_limit("search")),
+    clean_query: str = Depends(validated_query),
 ) -> SearchResponse:
-    if not q.strip():
-        raise HTTPException(status_code=422, detail="query must not be empty")
     if sort not in SORTS:
         raise HTTPException(
             status_code=422, detail=f"unknown sort (expected one of {', '.join(SORTS)})"
@@ -36,9 +35,12 @@ def search(
             status_code=422,
             detail=f"min_viewers must be between 0 and {MAX_MIN_VIEWERS}",
         )
+    if not clean_query:
+        # Unreachable: validated_query rejects empty queries first.
+        raise HTTPException(status_code=422, detail="query must not be empty")
     try:
         response = service.search(
-            q,
+            clean_query,
             platform=platform,
             sort=sort,
             has_location=has_location.strip().lower() in _TRUTHY,

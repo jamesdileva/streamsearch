@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 â””â”€â”€ .gitignore
 ```
 
-Current state: Sprint 10.1 done - platform failure isolation: per-adapter try/except in the service, `PlatformStatus` on every response, degraded responses never cached, and the route 502s only when EVERY platform failed (partial outage returns 200 so healthy results stay usable). `PlatformNotice` surfaces degraded platforms in the UI. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
+Current state: Sprint 10.2 done - in-memory sliding-window rate limiting (search 60/min, refresh 2/5min, per-peer, X-Forwarded-For deliberately ignored, unknown scopes fail open), query validation (200 chars, control chars, repeated filler) with privacy-safe logging (length + digest, never raw input), and 429/422 envelopes. Auth on /api/refresh is still owed before public exposure. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

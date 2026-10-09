@@ -561,3 +561,38 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   includes only synchronous adapter time, not HTTP/SQLite waits; quota is an estimate from
   documented rates, not observed platform accounting.
 - Commit: (this worklog entry pending)
+
+## 2026-10-09 — Sprint 11.1 Source and Content Handling Review
+
+- Sprint: 11.1 (Goal: make the indexing boundary explicit)
+- Branch: `feat/11-1-content-boundaries`
+- What: `docs/content-boundaries.md` — a review, not an aspiration. Each of the seven roadmap
+  areas is marked **enforced** (verified by reading the implementation and, where possible, by a
+  test) or **documented gap**.
+- Verification performed by reading code, not by trusting it:
+  - No media anywhere: grep for `yt-dlp|download|.mp4|write_bytes|createObjectURL` finds nothing
+    in backend or frontend. The `streams` table has no BLOB column; `thumbnail_url` holds a URL.
+  - Embed gating: `StreamCard` requires `embed_supported && embed_url`; the iframe exists only
+    inside `WatchModal` (never in a card or list).
+  - No proxy: the OpenAPI paths contain no proxy/fetch route at all.
+  - Attribution: every Stream carries `platform`/`channel_name`/`source_url`, rendered as a
+    `PlatformBadge` + Open Source link.
+- Gaps found and recorded honestly:
+  - **No takedown/removal path exists.** The only deletion in the codebase is the
+    `DELETE FROM streams WHERE live_status='ended' AND last_seen_at < cutoff` prune (4.3). There
+    is no `DELETE /api/streams/{id}`, no rights-holder intake, no suppression of a specific
+    result. Suggested minimal follow-up is written into the doc.
+  - `is_mature` is recorded in metadata by Twitch/Kick/YouTube adapters but **not surfaced** —
+    an open product decision, flagged again here rather than decided.
+  - Reports are stored but not acted on (advisory only).
+- Tests: `tests/test_boundaries.py` (7 new) pins the structural claims so the doc can't
+  silently drift — no media-payload fields on the model, index round-trip is metadata-only,
+  embed-only-when-allowed, no proxy route in the OpenAPI schema, reports don't remove content,
+  the doc itself must still admit the takedown gap, and `is_mature` stays metadata-only.
+- Verification:
+  - Backend: `python -m pytest -q` → **245 passed**; `python -m ruff check .` → clean
+  - Live review (roadmap's check): `?q=wildfire` → every result names its platform and links to
+    the platform's own domain; `twitch/rivercam` embed-supported, `twitch/cityhall` and
+    `fake/…` are not, so the UI correctly offers Watch vs Open Source per record.
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- Commit: (this worklog entry pending)

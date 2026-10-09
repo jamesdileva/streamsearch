@@ -11,6 +11,7 @@ the fake platforms stay in place. Fakes are never mixed with real adapters.
 """
 
 import logging
+import time
 
 from app.adapters.base import (
     AdapterConfigError,
@@ -30,6 +31,7 @@ from app.search.scoring import Weights, rank_streams, sort_streams
 from app.services.cache import CacheStats, SearchCache
 from app.services.freshness import freshness_of
 from app.services.index import upsert_stream
+from app.services.metrics import get_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +82,7 @@ class SearchService:
     ) -> None:
         self.adapters = adapters if adapters is not None else build_default_adapters()
         self.weights = weights or Weights()
+        self.metrics = get_metrics()
         self.cache = cache or SearchCache(ttl_seconds=settings.cache_ttl_seconds)
         self.stats = CacheStats()
 
@@ -92,6 +95,7 @@ class SearchService:
         language: str = "",
         min_viewers: int = 0,
     ) -> SearchResponse:
+        self.metrics.record_search_started()
         normalized = query.strip()
         platform_filter = platform.strip().lower()
         language_filter = language.strip().lower()
@@ -108,8 +112,10 @@ class SearchService:
         cached = self.cache.get(key)
         if cached is not None:
             self.stats.hits += 1
+            self.metrics.record_cache_hit()
             return cached
         self.stats.misses += 1
+        self.metrics.record_cache_miss()
         # Adapters receive the full query (platforms do their own matching);
         # ranking uses the parsed topic + place so location words don't
         # dilute text signals. Empty topic falls back to the full query.
@@ -118,12 +124,14 @@ class SearchService:
         results: list[Stream] = []
         statuses: list[PlatformStatus] = []
         for adapter in self.adapters:
+            started = time.perf_counter()
             try:
                 raw_records = adapter.search(normalized)
             except (AdapterError, AdapterConfigError) as exc:
                 # One platform failing must never take down the search:
                 # record it and keep going with the healthy adapters.
                 self.stats.adapter_errors += 1
+                self.metrics.record_adapter_error(adapter.platform, str(exc))
                 statuses.append(
                     PlatformStatus(
                         platform=adapter.platform,
@@ -132,7 +140,10 @@ class SearchService:
                     )
                 )
                 continue
+            latency_ms = (time.perf_counter() - started) * 1000
             self.stats.adapter_calls += 1
+            self.metrics.record_adapter_success(adapter.platform, latency_ms)
+            self.metrics.add_quota_estimate(adapter.search_quota_cost)
             statuses.append(
                 PlatformStatus(platform=adapter.platform, status="ok")
             )
@@ -182,10 +193,16 @@ class SearchService:
     @staticmethod
     def _store_in_index(streams: list[Stream]) -> None:
         # The index must never break search: a failing store is logged and
-        # skipped (operational visibility lands in Sprint 10.3).
+        # skipped (observability surfaces the gap — Sprint 10.3).
+        metrics = get_metrics()
         for stream in streams:
             try:
-                upsert_stream(stream)
+                stored = upsert_stream(stream)
+                # Identical first/last-seen timestamps mean a fresh insert,
+                # i.e. genuinely new discovery rather than a re-sighting.
+                metrics.record_index_write(
+                    discovered=stored.first_seen_at == stored.last_seen_at
+                )
             except Exception:
                 logger.warning("index upsert failed", exc_info=True)
 

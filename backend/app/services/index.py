@@ -163,6 +163,51 @@ def index_counts() -> tuple[int, int]:
         return total, live
 
 
+def index_stats(
+    fresh_seconds: int = 300, aging_seconds: int = 1800, now: datetime | None = None
+) -> dict[str, int]:
+    """Durable index health for observability (Sprint 10.3).
+
+    `stale`/`unverified` describe records the refresh loop (4.3) should be
+    revalidating; a growing number is the signal that freshness is decaying.
+    """
+    at = now or datetime.now(timezone.utc)
+    if at.tzinfo is None:
+        at = at.replace(tzinfo=timezone.utc)
+    stale_cutoff = _iso(at - timedelta(seconds=aging_seconds))
+    fresh_cutoff = _iso(at - timedelta(seconds=fresh_seconds))
+    with connect() as conn:
+        _ensure_table(conn)
+        counts = {
+            "total": conn.execute("SELECT COUNT(*) FROM streams").fetchone()[0],
+            "live": conn.execute(
+                "SELECT COUNT(*) FROM streams WHERE live_status = 'live'"
+            ).fetchone()[0],
+            "ended": conn.execute(
+                "SELECT COUNT(*) FROM streams WHERE live_status = 'ended'"
+            ).fetchone()[0],
+            "unknown": conn.execute(
+                "SELECT COUNT(*) FROM streams WHERE live_status = 'unknown'"
+            ).fetchone()[0],
+        }
+        # Live records still marked live but verified too long ago.
+        counts["stale"] = conn.execute(
+            "SELECT COUNT(*) FROM streams WHERE live_status = 'live'"
+            " AND last_verified_at IS NOT NULL AND last_verified_at < ?",
+            (stale_cutoff,),
+        ).fetchone()[0]
+        counts["fresh"] = conn.execute(
+            "SELECT COUNT(*) FROM streams WHERE live_status = 'live'"
+            " AND last_verified_at >= ?",
+            (fresh_cutoff,),
+        ).fetchone()[0]
+        counts["unverified"] = conn.execute(
+            "SELECT COUNT(*) FROM streams"
+            " WHERE last_verified_at IS NULL OR last_verified_at = ''"
+        ).fetchone()[0]
+        return counts
+
+
 def prune_ended_older_than(days: int, now: datetime | None = None) -> int:
     """Delete ended records unseen for longer than `days`. Returns count."""
     at = now or datetime.now(timezone.utc)

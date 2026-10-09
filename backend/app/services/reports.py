@@ -26,6 +26,12 @@ def _connect() -> sqlite3.Connection:
     return conn
 
 
+def count_reports() -> int:
+    """Total report volume for observability (Sprint 10.3)."""
+    with _connect() as conn:
+        return conn.execute("SELECT COUNT(*) FROM reports").fetchone()[0]
+
+
 def save_report(data: ReportCreate) -> Report:
     created = datetime.now(timezone.utc).isoformat()
     with _connect() as conn:

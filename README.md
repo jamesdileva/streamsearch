@@ -36,7 +36,9 @@ python -m uvicorn app.main:app --reload
 # &has_location=true — filters combine with the query server-side.
 ```
 
-Sprint 10.2 done - rate limiting + abuse protection: in-memory sliding-window limiter (search 60/min, refresh 2/5min, per-peer, X-Forwarded-For deliberately ignored, unknown scopes fail open), query validation (200 chars, control chars, repeated filler) with privacy-safe logging (length + digest, never raw input), and 429/422 error envelopes. Auth on /api/refresh is still owed before public exposure. Next: `docs/sprint-roadmap.md` (10.3 observability).
+Sprint 10.2 done - rate limiting + abuse protection: in-memory sliding-window limiter (search 60/min, refresh 2/5min, per-peer, X-Forwarded-For deliberately ignored, unknown scopes fail open), query validation (200 chars, control chars, repeated filler) with privacy-safe logging (length + digest, never raw input), and 429/422 error envelopes.
+
+Sprint 10.3 done - observability: `GET /api/stats` reports every roadmap metric — searches, cache hits/misses + rate, per-adapter latency/errors + error rate, streams discovered vs indexed, estimated quota units, index staleness (total/live/ended/stale/fresh/unverified), and report volume — via a thread-safe in-process `MetricsRegistry`. Remote alerting is still owed. Next: `docs/sprint-roadmap.md` (11.1 source and content handling review).
 
 ## Target stack
 

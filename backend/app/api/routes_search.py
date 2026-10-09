@@ -37,7 +37,7 @@ def search(
             detail=f"min_viewers must be between 0 and {MAX_MIN_VIEWERS}",
         )
     try:
-        return service.search(
+        response = service.search(
             q,
             platform=platform,
             sort=sort,
@@ -47,7 +47,14 @@ def search(
         )
     except AdapterError as exc:
         # A broken platform must not leak internals — 502 envelope.
-        # Per-platform status + partial results land in Sprint 10.1.
         raise HTTPException(
             status_code=502, detail="live search temporarily unavailable"
         ) from exc
+    # A partial outage still returns 200 with usable results (Sprint 10.1).
+    # Only a total outage — no results *and* every platform errored — is a
+    # 502, keeping failures visible instead of silently empty.
+    if response.results or all(s.status == "ok" for s in response.platform_status):
+        return response
+    raise HTTPException(
+        status_code=502, detail="live search temporarily unavailable"
+    )

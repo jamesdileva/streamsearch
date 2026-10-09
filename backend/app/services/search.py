@@ -12,13 +12,18 @@ the fake platforms stay in place. Fakes are never mixed with real adapters.
 
 import logging
 
-from app.adapters.base import AdapterError, BasePlatformAdapter, FakeAdapter
+from app.adapters.base import (
+    AdapterConfigError,
+    AdapterError,
+    BasePlatformAdapter,
+    FakeAdapter,
+)
 from app.adapters.fake_twitch import FakeTwitchAdapter
 from app.adapters.kick import KickAdapter
 from app.adapters.twitch import TwitchAdapter
 from app.adapters.youtube import YouTubeAdapter
 from app.config import settings
-from app.models.stream import SearchResponse, Stream
+from app.models.stream import PlatformStatus, SearchResponse, Stream
 from app.search.dedup import dedupe_streams
 from app.search.location import parse_location
 from app.search.scoring import Weights, rank_streams, sort_streams
@@ -111,13 +116,26 @@ class SearchService:
         parsed = parse_location(normalized)
         text_query = parsed.topic or normalized
         results: list[Stream] = []
+        statuses: list[PlatformStatus] = []
         for adapter in self.adapters:
             try:
                 raw_records = adapter.search(normalized)
-            except AdapterError:
+            except (AdapterError, AdapterConfigError) as exc:
+                # One platform failing must never take down the search:
+                # record it and keep going with the healthy adapters.
                 self.stats.adapter_errors += 1
-                raise
+                statuses.append(
+                    PlatformStatus(
+                        platform=adapter.platform,
+                        status="error",
+                        detail=str(exc)[:200],
+                    )
+                )
+                continue
             self.stats.adapter_calls += 1
+            statuses.append(
+                PlatformStatus(platform=adapter.platform, status="ok")
+            )
             for raw in raw_records:
                 stream = Stream(**raw)
                 stream.freshness = freshness_of(
@@ -151,9 +169,14 @@ class SearchService:
             results=ordered,
             count=len(ordered),
             duplicates_removed=removed,
+            platform_status=statuses,
         )
         self._store_in_index(ranked)
-        self.cache.put(key, response)
+        # Only fully healthy responses are cached: a degraded one would
+        # otherwise serve a stale "platform down" verdict for the whole TTL,
+        # and failures must stay immediately retryable (Sprint 4.1).
+        if all(s.status == "ok" for s in statuses):
+            self.cache.put(key, response)
         return response
 
     @staticmethod

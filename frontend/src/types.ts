@@ -30,10 +30,18 @@ export interface Stream {
   score: number | null;
 }
 
+export interface PlatformStatus {
+  platform: string;
+  status: 'ok' | 'error';
+  detail?: string | null;
+}
+
 export interface SearchResponse {
   query: string;
   results: Stream[];
   count: number;
+  duplicates_removed: number;
+  platform_status: PlatformStatus[];
 }
 
 // Correction reports (mirrors backend report model).

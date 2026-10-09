@@ -461,3 +461,47 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   - Environmental note: the first smoke attempt hit a *different local project's* server holding port 8000 (`C:\Users\j\Projects\matrix`), which produced a confusing `KeyError: 'count'`. Re-ran on port 8011 after confirming the bind failure in the server log. Worth remembering: check `Get-CimInstance Win32_Process` for port conflicts before trusting a smoke result.
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
 - Deferred live procedure (needs `KICK_CLIENT_ID/SECRET`): set in `backend/.env`, restart, `GET /api/search?q=` for topics with Kick coverage → expect `platform: "kick"` records, each verifiably live; open `source_url` to confirm; check the real field names against the mapped ones and adjust `_first` key lists if Kick sent different keys.
+
+- Commit: `e960fef feat: sprint 9.2 kick adapter (official public api, mock-first)` (+ merge `e8bf0c1`)
+
+## 2026-10-09 — Sprint 10.1 Platform Failure Isolation
+
+- Sprint: 10.1 (Goal: a broken platform should not break the search engine)
+- Branch: `feat/10-1-failure-isolation`
+- Problem before: `SearchService.search` re-raised the first `AdapterError`, so one
+  unavailable platform turned the entire search into a 502, and the route had no way
+  to report which platform failed.
+- What: per-adapter try/except in the service — a failing platform records a
+  `PlatformStatus` entry and the loop continues with the healthy adapters. Every
+  response now carries `platform_status` (healthy platforms included, so a client can
+  say "N of M platforms"). The route returns 502 only when every platform failed and
+  there are no results; a partial outage returns 200 with the healthy platforms'
+  results intact. Degraded responses are never cached, so failures stay immediately
+  retryable rather than being pinned for the TTL. `PlatformNotice` renders the warning
+  in the UI. Adapter error messages surface by design (`AdapterError` is documented
+  to never carry secrets), capped at 200 chars, and the total-outage 502 envelope
+  itself stays opaque.
+- Non-goals (deferred): retries/backoff per failure (currently single-attempt),
+  circuit breaking, status persistence, alerting (10.3).
+- Verification:
+  - Backend: `python -m pytest -q` → **215 passed** (11 new in
+    `tests/test_failure_isolation.py`). Each roadmap failure mode — timeout,
+    quota-exhausted (403), rate-limited (429), auth failure (401), malformed
+    response, connection outage, and misconfiguration — is simulated alongside a
+    healthy adapter and must leave the healthy platform's results intact with an
+    `error` status for the broken one. Also pins: empty results are not an error,
+    all-platforms-failing reports all errors, degraded responses are not cached while
+    healthy ones are, partial outage returns 200, total outage is the opaque 502,
+    genuinely empty is 200, detail capped at 200 chars, and the 502 body never echoes
+    adapter detail.
+  - Frontend: `npm run typecheck` OK; `npm run lint` (oxlint) clean; `npm run test` →
+    **50 passed** (4 new PlatformNotice tests + 1 App integration test; existing
+    mocks updated for the new required `platform_status` field); `npm run build` OK
+  - Live: `?q=storm` → 3 results with both fake platforms `ok`; empty `q` → 422
+    envelope; smoke `.db` removed after
+  - Process note: a scripted multi-line edit to App.test.tsx silently swallowed
+    closing braces (parse error caught it), and the single-line variants were missed
+    (tsc caught those). Reverted and redid it as a targeted regex insertion — the
+    lesson is that bulk text edits to test fixtures need typecheck immediately after.
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- Commit: (this worklog entry pending)

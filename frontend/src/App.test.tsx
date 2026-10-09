@@ -43,6 +43,8 @@ beforeEach(() => {
     query: 'wildfire',
     results: [STREAM],
     count: 1,
+    duplicates_removed: 0,
+    platform_status: [{ platform: 'fake', status: 'ok' }],
   });
 });
 
@@ -106,8 +108,20 @@ test('special characters pass through unmodified', async () => {
 test('repeated searches show the latest results', async () => {
   const second: Stream = { ...STREAM, id: 'fake-2', title: 'Second result' };
   const search = vi.spyOn(api, 'searchStreams');
-  search.mockResolvedValueOnce({ query: 'one', results: [STREAM], count: 1 });
-  search.mockResolvedValueOnce({ query: 'two', results: [second], count: 1 });
+  search.mockResolvedValueOnce({
+    query: 'one',
+    results: [STREAM],
+    count: 1,
+    duplicates_removed: 0,
+    platform_status: [{ platform: 'fake', status: 'ok' }],
+  });
+  search.mockResolvedValueOnce({
+    query: 'two',
+    results: [second],
+    count: 1,
+    duplicates_removed: 0,
+    platform_status: [{ platform: 'fake', status: 'ok' }],
+  });
   render(<App />);
   submitQuery('one');
   await waitFor(() => {
@@ -130,6 +144,8 @@ test('empty results show the empty state', async () => {
     query: 'nothing',
     results: [],
     count: 0,
+    duplicates_removed: 0,
+    platform_status: [{ platform: 'fake', status: 'ok' }],
   });
   render(<App />);
   submitQuery('nothing');
@@ -161,6 +177,8 @@ test('platform options come from results and refetch on change', async () => {
     query: 'wildfire',
     results: [STREAM, twitch],
     count: 2,
+    duplicates_removed: 0,
+    platform_status: [{ platform: 'fake', status: 'ok' }],
   });
   render(<App />);
   submitQuery('wildfire');
@@ -224,6 +242,8 @@ test('language options come from results and refetch on change', async () => {
     query: 'wildfire',
     results: [STREAM, ja, unknown],
     count: 3,
+    duplicates_removed: 0,
+    platform_status: [{ platform: 'fake', status: 'ok' }],
   });
   render(<App />);
   submitQuery('wildfire');
@@ -263,6 +283,8 @@ test('watch button opens and closes the full-screen player', async () => {
     query: 'wildfire',
     results: [watchable],
     count: 1,
+    duplicates_removed: 0,
+    platform_status: [{ platform: 'fake', status: 'ok' }],
   });
   render(<App />);
   submitQuery('wildfire');
@@ -277,4 +299,29 @@ test('watch button opens and closes the full-screen player', async () => {
 
   fireEvent.keyDown(document, { key: 'Escape' });
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+});
+
+test('partial outage shows a notice but keeps healthy results', async () => {
+  const twitch: Stream = {
+    ...STREAM,
+    id: 'fake-2',
+    platform_stream_id: 'fake-2',
+    title: 'Twitch live',
+  };
+  vi.spyOn(api, 'searchStreams').mockResolvedValue({
+    query: 'wildfire',
+    results: [STREAM, twitch],
+    count: 2,
+    duplicates_removed: 0,
+    platform_status: [
+      { platform: 'fake', status: 'ok' },
+      { platform: 'twitch', status: 'error', detail: 'rate limited (429)' },
+    ],
+  });
+  render(<App />);
+  submitQuery('wildfire');
+  await screen.findAllByTestId('search-result');
+  expect(screen.getByTestId('platform-notice')).toHaveTextContent(
+    'Showing results from 1 of 2 platforms',
+  );
 });

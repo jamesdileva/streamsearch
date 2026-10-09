@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
+import PlatformNotice from './components/PlatformNotice';
 import ResultsList from './components/ResultsList';
 import SearchBar from './components/SearchBar';
 import SearchFilters from './components/SearchFilters';
 import WatchModal from './components/WatchModal';
 import { DEFAULT_FILTERS, type FilterState } from './lib/filters';
 import { fetchHealth, searchStreams } from './services/api';
-import type { Stream } from './types';
+import type { PlatformStatus, Stream } from './types';
 
 type HealthState =
   | { status: 'loading' }
@@ -16,7 +17,7 @@ type SearchState =
   | { status: 'idle' }
   | { status: 'empty-query' }
   | { status: 'loading'; query: string }
-  | { status: 'ok'; query: string; streams: Stream[] }
+  | { status: 'ok'; query: string; streams: Stream[]; platformStatus: PlatformStatus[] }
   | { status: 'error'; query: string; message: string };
 
 function errMessage(e: unknown): string {
@@ -46,7 +47,12 @@ export default function App() {
     setSearch({ status: 'loading', query });
     searchStreams(query, opts)
       .then((r) =>
-        setSearch({ status: 'ok', query, streams: r.results }),
+        setSearch({
+          status: 'ok',
+          query,
+          streams: r.results,
+          platformStatus: r.platform_status ?? [],
+        }),
       )
       .catch((e: unknown) =>
         setSearch({ status: 'error', query, message: errMessage(e) }),
@@ -116,6 +122,7 @@ export default function App() {
         )}
         {search.status === 'ok' && search.streams.length > 0 && (
           <>
+            <PlatformNotice statuses={search.platformStatus} />
             <p data-testid="search-count">
               Found {search.streams.length} live stream
               {search.streams.length === 1 ? '' : 's'} for “{search.query}”.
@@ -124,9 +131,12 @@ export default function App() {
           </>
         )}
         {search.status === 'ok' && search.streams.length === 0 && (
-          <p data-testid="search-empty">
-            No live streams found for “{search.query}”.
-          </p>
+          <>
+            <PlatformNotice statuses={search.platformStatus} />
+            <p data-testid="search-empty">
+              No live streams found for “{search.query}”.
+            </p>
+          </>
         )}
         {search.status === 'error' && (
           <p data-testid="search-error">

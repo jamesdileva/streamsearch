@@ -61,9 +61,25 @@ class IndexedStream(Stream):
     ended_at: datetime | None = None
 
 
+class PlatformStatus(BaseModel):
+    """Per-platform outcome, so one failure never hides the others.
+
+    `detail` is the adapter's own controlled message — `AdapterError` is
+    documented to never carry secrets, so it is safe to surface. The route
+    never echoes the 502's internal reason.
+    """
+
+    platform: str
+    status: Literal["ok", "error"]
+    detail: str | None = None
+
+
 class SearchResponse(BaseModel):
     query: str
     results: list[Stream] = Field(default_factory=list)
     count: int = 0
     # Collapsed by dedup (Sprint 6.2); the index keeps every sighting.
     duplicates_removed: int = 0
+    # Sprint 10.1: always reported, healthy platforms included, so the
+    # client can show "results from N of M platforms".
+    platform_status: list[PlatformStatus] = Field(default_factory=list)

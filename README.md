@@ -36,7 +36,7 @@ python -m uvicorn app.main:app --reload
 # &has_location=true — filters combine with the query server-side.
 ```
 
-Sprint 9.2 done — `KickAdapter` (official Public API: `categories?q=` text search then `v2/livestreams?category_id=`, top-live fallback, channel-stable ids, `users/livestreams` reverify, token cache + 401 retry, defensive field mapping across Kick payload revisions); keyed by `KICK_CLIENT_ID/SECRET`, in the yt/twitch/kick/fakes factory matrix. 3-platform live verification **deferred** until credentials exist. Open item: `is_mature` policy (held in metadata, not surfaced). Next: `docs/sprint-roadmap.md` (10.1 platform failure isolation).
+Sprint 10.1 done - platform failure isolation: one broken platform degrades its own status entry while the rest still return results (per-adapter try/except, `PlatformStatus` on every response, degraded responses not cached, 502 only when every platform failed); `PlatformNotice` warns in the UI. Next: `docs/sprint-roadmap.md` (10.2 rate limiting).
 
 ## Target stack
 

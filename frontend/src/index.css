@@ -344,8 +344,7 @@ code {
 }
 
 /* Sprint 5.3 filters: inline row, wraps and stacks on narrow screens. */
-.search-filters {
-  display: flex;
+.search-filters {  display: flex;
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
@@ -367,6 +366,19 @@ code {
   border-radius: 6px;
   color: var(--text-h);
   background: var(--bg);
+}
+
+/* Sprint 10.1: partial-outage notice. */
+.platform-notice {
+  font-size: 13px;
+  margin: 4px 0 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  color: var(--text);
+  background: var(--code-bg);
+  text-align: left;
 }
 
 /* Sprint 8.3: touch devices get real tap targets (≥44px) and compact cards.

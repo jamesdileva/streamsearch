@@ -20,6 +20,17 @@ export async function fetchHealth(signal?: AbortSignal): Promise<HealthResponse>
   return res.json() as Promise<HealthResponse>;
 }
 
+async function readError(res: Response, fallback: string): Promise<string> {
+  // Surface the server's own `{"error": {"message"}}` (429, 422, 502 ...)
+  // so users see "too many requests", not "search failed: 429".
+  try {
+    const body = (await res.json()) as { error?: { message?: string } };
+    return body.error?.message || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export async function searchStreams(
   query: string,
   opts: SearchOptions = {},
@@ -44,7 +55,9 @@ export async function searchStreams(
   const res = await fetch(`${API_BASE}/api/search?${params.toString()}`, {
     signal,
   });
-  if (!res.ok) throw new Error(`search failed: ${res.status}`);
+  if (!res.ok) {
+    throw new Error(await readError(res, `search failed: ${res.status}`));
+  }
   return res.json() as Promise<SearchResponse>;
 }
 

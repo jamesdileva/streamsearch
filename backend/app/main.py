@@ -12,6 +12,10 @@ from app.api.errors import register_error_handlers
 from app.config import settings
 from app.services.refresh import run_refresh_once
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
 logger = logging.getLogger(__name__)
 
 

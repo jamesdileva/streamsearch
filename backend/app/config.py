@@ -43,6 +43,11 @@ class Settings:
     embeddings_query_prefix: str | None = os.getenv("EMBEDDINGS_QUERY_PREFIX")
     embeddings_doc_prefix: str | None = os.getenv("EMBEDDINGS_DOC_PREFIX")
     cors_origins: list[str] = _cors_origins()
+    # Rate limiting + abuse protection (Sprint 10.2). In-memory, per process.
+    rate_limit_search: int = int(os.getenv("RATE_LIMIT_SEARCH", "60"))
+    rate_limit_search_window: int = int(os.getenv("RATE_LIMIT_SEARCH_WINDOW", "60"))
+    rate_limit_refresh: int = int(os.getenv("RATE_LIMIT_REFRESH", "2"))
+    rate_limit_refresh_window: int = int(os.getenv("RATE_LIMIT_REFRESH_WINDOW", "300"))
 
 
 settings = Settings()

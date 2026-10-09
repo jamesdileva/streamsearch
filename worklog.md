@@ -505,3 +505,24 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
     lesson is that bulk text edits to test fixtures need typecheck immediately after.
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
 - Commit: (this worklog entry pending)
+
+## 2026-10-09 — Sprint 10.2 Rate Limiting & Abuse Protection
+
+- Sprint: 10.2 (Goal: protect the service and platform API quotas)
+- Branch: `feat/10-2-rate-limiting`
+- What:
+  - `services/ratelimit.py` — in-memory sliding-window limiter (per scope + client), thread-safe, unknown scopes fail open so a missing rule never takes the service down.
+  - `api/deps.py` — `client_key` (peer address; `X-Forwarded-For` deliberately ignored so buckets can't be spoofed), `rate_limit(scope)` dependency, `validated_query` dependency.
+  - `api/queryguard.py` — structural abuse guards: 200-char cap, control characters, repeated filler. Rejections log length + SHA-256 digest, never the raw query.
+  - Routes: `/api/search` and `/api/geo` limited + query-validated; `/api/refresh` limited tightly (2/5min); `/api/health` intentionally unlimited so monitoring survives an abusive client.
+  - `main.py` — logging configured (INFO, timestamps) so the above is actually visible.
+  - Frontend: surfaces the server's `error.message` instead of `search failed: 429`.
+- Config: `RATE_LIMIT_SEARCH=60`, `RATE_LIMIT_SEARCH_WINDOW=60`, `RATE_LIMIT_REFRESH=2`, `RATE_LIMIT_REFRESH_WINDOW=300`.
+- Non-goals (deferred): **auth on /api/refresh** (still owed before public exposure — the limiter makes it expensive, not safe); per-account limits; adaptive/heuristic abuse rules; content filtering (11.2's job, deliberately not built).
+- Verification:
+  - Backend: `python -m pytest -q` → **227 passed** (12 new in `test_ratelimit.py`). Burst tests: 4-request burst against limit-3 returns `[200,200,200,429]`; X-Forwarded-For spoofing does NOT buy a new bucket; refresh limited to 2/300s; health never limited; unknown scope fails open. Query guards: >200 chars, control chars, and repeated filler all 422; normal queries pass. Privacy: `PRIVATE_USER_INPUT_…` never appears in logs while `digest=` does. Includes a hermetic-limiter fixture with a note about why (the limiter is process-global and starved other suites at first).
+  - Frontend: `npm run typecheck` OK; `npm run lint` clean; `npm run test` → **51 passed** (new test asserts the rate-limit message surfaces and `429` does not); `npm run build` OK
+  - Live: normal search 200 with `platform_status`; **70-request burst → 59×200 then 11×429** with the envelope body; health 200 throughout; 300-char query rejected
+  - Secrets: staged leak check empty; no `.env`/creds tracked
+- Known limitation recorded: the limiter is per-process. With multiple uvicorn workers the effective limit multiplies; Redis (or another shared store) is the fix, and stays unjustified until horizontal scaling actually happens.
+- Commit: (this worklog entry pending)

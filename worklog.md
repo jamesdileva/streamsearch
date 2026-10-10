@@ -672,3 +672,37 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   touched. Full suite (260 tests) still green as a no-regression check.
 - Secrets: n/a, nothing staged.
 - Commit: (this worklog entry pending)
+
+## 2026-10-10 — YouTube Live Verification (deferred from Sprints 1.2 / 1.3 / 5.x)
+
+- Goal: close the deferred source-truth procedure for the YouTube adapter with a real key.
+- Setup: user added `YOUTUBE_API_KEY` to `.env` (project root). Verified before use: `.env`
+  exists, is gitignored (`.gitignore:21`), and untracked by git; the key value was never printed
+  or committed. Loaded into the server with `uvicorn --env-file ../.env`.
+- Procedure (from `README.md`): 5 queries — wildfire, storm, news, gaming, concert.
+- Results (each query → 10 records, all `platform: youtube`, all `live_status: live`):
+  - `wildfire` — LA County Fire live scanner, storm-chaser severe-weather coverage
+  - `storm` — AccuWeather Hurricane Isaias live, storm-chase streams (9492 / 5357 / 2465 viewers)
+  - `news` — Television Jamaica Prime Time News, Bloomberg Business News Live
+  - `gaming` — streamer gaming streams (1120 / 289 / 78 viewers)
+  - `concert` — Mosaic Concert (Boyer College of Music), A&M-Kingsville bands, Notre Dame Symphony Orchestra
+- Source-truth checks from the roadmap, all passing:
+  - results appear ✓ (10 per query)
+  - titles match source ✓ (real YouTube live titles; channel names match the broadcasting channel)
+  - thumbnails match source ✓ — `https://i.ytimg.com/vi/<id>/hqdefault_live.jpg`, fetched and returns HTTP 200 from the YouTube CDN
+  - links open the live broadcast ✓ — `https://www.youtube.com/watch?v=<id>` returns HTTP 200
+  - platform identified ✓ (all `youtube`)
+  - no raw API response leaks ✓ — response field set is `Stream`-only; no `snippet` /
+    `liveStreamingDetails` / `recordingDetails` / `etag` / `pageInfo`
+- Additional real-data validation:
+  - identity: `id=youtube-<videoId>`, `source_url`/`embed_url` correctly assembled from the video id
+  - `started_at` from `liveStreamingDetails.actualStartTime` (e.g. 2026-09-30 for a 24/7 stream, 2026-10-09 for the live concerts) and `freshness: fresh`
+  - viewer counts present and plausible; ranking put the title-matching stream first even at 1
+    viewer, confirming the Sprint 7.3 decision (viewers as tiebreak, never primary) behaves as
+    intended on real data
+  - frontend + backend served together (frontend 200, backend real results, thumbnails from
+    `i.ytimg.com`)
+- Quota observed: ~5 searches × ~101 units ≈ 505 units of YouTube's daily quota.
+- Still pending the same treatment: `TWITCH_CLIENT_ID/SECRET` (Sprint 5.2) and
+  `KICK_CLIENT_ID/SECRET` (Sprint 9.2) — both recorded as deferred in their worklog entries.
+- Secrets: key never printed or committed; smoke `.db` files removed after each run.

@@ -746,3 +746,50 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   touched; full suite re-run green as a no-regression check (260 tests).
 - No secrets involved.
 - Commit: (this worklog entry pending)
+
+## 2026-10-10 — Sprint 13.2 Advanced Event Detection (measurement + verdict)
+
+- Sprint: 13.2 (Goal: move from stream search toward event search)
+- Branch: `feat/13-2-event-detection`
+- What: `app/search/events.py` (EXPERIMENT, not wired to search) +
+  `GET /api/events?q=` inspectable endpoint.
+- Fixes Sprint 6.3's actual failure mode. 6.3 linked on any token overlap,
+  so an LA fire stream merged with an LA traffic stream (shared city word).
+  New rules: shared event family required; identical family sets required
+  (a "fire and storm" stream can't bridge two events); shared named entity
+  required; location disagreement vetoes; location OR time agrees.
+- Curated 7-family event vocabulary (`EVENT_FAMILIES`) — deliberately small,
+  with the Sprint 3.2 "no hand-built ontology" guardrail attached.
+- Measurement (the deliverable):
+  - Labeled fixtures (`tests/test_event_detection.py`, 8 tests): **recall
+    2/2** (3-broadcast wildfire + 2-broadcast concert both detected),
+    **precision 5/5** (LA-fire-vs-traffic, storm-vs-concert-tokyo,
+    wildfire-la-vs-tokyo, conflicting-terms, gaming-vs-news all kept apart).
+  - Live YouTube (real key): `storm` → 10 streams → **1 proposal containing
+    all 10** (Hurricane Isaias: one event, many broadcasts — the roadmap's
+    target); `wildfire` → 6 streams → 0 proposals (no false merge).
+- **A real false positive the live measurement caught and fixed:** first
+  attempt merged a religious "Prophetic Wildfire Live — LIVE PROPHECY"
+  stream with the LA County Fire scanner (shared `fire` family, only filler
+  otherwise). That produced rule 3 (shared named entity): after it the false
+  merge disappears and the genuine 10-broadcast cluster survives. Worth
+  noting this bug was only visible on real data — none of the fixtures
+  would have caught it.
+- Verdict: **keep the prototype, do not ship as a ranking feature.** It
+  solves the roadmap's question and beats 6.3 on the exact failure mode;
+  held back by 16 streams of evidence, no confidence signal worth acting on,
+  and no UI surface that would make it useful to a searcher. Next steps
+  written into the doc (50+ real cross-platform queries; make shared-entity
+  overlap a reported score rather than a boolean gate; UI consideration last).
+- Sprint 13.3 (CV) — **NO-GO, decided without an experiment**, recorded in
+  the same doc: (1) decoding video frames violates the enforced
+  metadata-only boundary of `docs/content-boundaries.md` (Sprint 11.1), so
+  it would require changing the product's core legal posture; (2) small
+  VLMs are unreliable for exactly the needed discrimination and large ones
+  are unaffordable via API with no local GPU. Owner and I agreed on cost
+  grounds; the boundary argument is the decisive one.
+- Verification: `python -m pytest -q` → **268 passed** (8 new);
+  `python -m ruff check .` clean; live `/api/events?q=storm` returned the
+  10-member hurricane proposal. No secrets in logs; `.db` and boot files
+  cleaned up after runs.
+- Commit: (this worklog entry pending)

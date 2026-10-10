@@ -40,7 +40,11 @@ Sprint 10.2 done - rate limiting + abuse protection: in-memory sliding-window li
 
 Sprint 12.1 done — TikTok feasibility: **NO-GO** (no official live-discovery API; all access undocumented). See `docs/tiktok-feasibility.md`.
 
-Sprint 13.1 done — transcript relevance: **NO-GO** in `docs/transcript-relevance.md`. `captions.download` requires OAuth 2.0 and owner-level edit permission, so transcripts of third-party streams (what a discovery engine needs) aren't legitimately accessible; `captions.list`+download also cost 250 units/stream. Undocumented caption endpoints stay out of bounds. `vague-title` gap stays open and labelled unclosable legitimately. Remaining Phase 13 experiments: 13.2 event detection, 13.3 CV (also expected NO-GO).
+Sprint 13.1 done — transcript relevance: **NO-GO** in `docs/transcript-relevance.md` (`captions.download` needs OAuth + owner-level edit permission, so third-party transcripts are not legitimately accessible).
+
+Sprint 13.2 done — event detection works on live data; kept as an inspectable prototype (`GET /api/events?q=`), NOT wired to search. Recall 2/2 and precision 5/5 on the labeled set, and live YouTube `storm` grouped all 10 Hurricane Isaias broadcasts into one event. Verdict: keep prototype, don't ship as a ranking feature, pending a larger sample (`docs/event-detection.md`).
+
+Sprint 13.3 — computer vision: **NO-GO without an experiment** — decoding frames violates the enforced metadata-only boundary of `docs/content-boundaries.md`, and small-VLM reliability plus GPU/cost make it unaffordable. Next: `docs/sprint-roadmap.md` (Phase 14 alerts & saved searches).
 
 ## Target stack
 

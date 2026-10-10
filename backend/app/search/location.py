@@ -49,6 +49,23 @@ class ParsedQuery:
     place_attempt: str | None  # "near X" text when X is unknown
 
 
+def gazetteer_lookup(location_text: str) -> tuple[str, Place] | None:
+    """Deterministic text -> gazetteer place, or None (no geocoding)."""
+    normalized = " ".join(
+        part.lower() for part in location_text.replace(",", " ").split()
+    )
+    if not normalized:
+        return None
+    for place in PLACES.values():
+        if place.name == normalized:
+            return place.name, place
+    # Token containment so "Downtown Los Angeles, CA" resolves to los angeles.
+    for place in sorted(PLACES.values(), key=lambda p: len(p.name), reverse=True):
+        if all(token in normalized.split() for token in place.name.split()):
+            return place.name, place
+    return None
+
+
 def _clean_topic(topic: str) -> str:
     return re.sub(r"\b(?:near|in)$", "", topic).strip()
 

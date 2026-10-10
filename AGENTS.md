@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 â””â”€â”€ .gitignore
 ```
 
-Current state: Sprint 11.2 done - search abuse controls evaluated and documented in `docs/abuse-controls.md`. One control implemented: client IPs are masked in logs (`mask_ip`, /24 or /64 prefix + digest) because full IPs in retained logs are unnecessary PII. Everything else was already safe by construction: no `dangerouslySetInnerHTML` anywhere (React escapes platform metadata), search queries are never persisted (request scope + 60s cache, digest-only logging), spam guards shipped in 10.2. Doxxing/targeting controls deliberately NOT built - intent detection is out of scope for an index. Phase 11 complete. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
+Current state: Sprint 12.1 done - TikTok feasibility researched in `docs/tiktok-feasibility.md`: **NO-GO**. No official TikTok API exposes live-stream discovery (Research API is academic-approval-gated and VOD-only; API v2/Display/Content Posting are creator-scoped). All live access is undocumented/reverse-engineered, which the product boundary rules out; access is also creator-keyed, so an event-first discovery query doesn't exist even illegally. Adapter stays deferred; re-evaluate only if an official, developer-accessible live-search API ships. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

@@ -38,7 +38,9 @@ python -m uvicorn app.main:app --reload
 
 Sprint 10.2 done - rate limiting + abuse protection: in-memory sliding-window limiter (search 60/min, refresh 2/5min, per-peer, X-Forwarded-For deliberately ignored, unknown scopes fail open), query validation (200 chars, control chars, repeated filler) with privacy-safe logging (length + digest, never raw input), and 429/422 error envelopes.
 
-Sprint 12.1 done — TikTok feasibility researched in `docs/tiktok-feasibility.md`: **NO-GO**. No official TikTok API exposes live-stream discovery (Research API is academic-approval-gated and VOD-only; API v2/Display/Content Posting are creator-scoped). All live access is undocumented/reverse-engineered, which the product boundary rules out; access is also creator-keyed, so an event-first discovery query doesn't exist even illegally. Adapter stays deferred; re-evaluate only if an official, developer-accessible live-search API ships. Next: `docs/sprint-roadmap.md` (Phase 13 advanced live intelligence, optional).
+Sprint 12.1 done — TikTok feasibility: **NO-GO** (no official live-discovery API; all access undocumented). See `docs/tiktok-feasibility.md`.
+
+Sprint 13.1 done — transcript relevance: **NO-GO** in `docs/transcript-relevance.md`. `captions.download` requires OAuth 2.0 and owner-level edit permission, so transcripts of third-party streams (what a discovery engine needs) aren't legitimately accessible; `captions.list`+download also cost 250 units/stream. Undocumented caption endpoints stay out of bounds. `vague-title` gap stays open and labelled unclosable legitimately. Remaining Phase 13 experiments: 13.2 event detection, 13.3 CV (also expected NO-GO).
 
 ## Target stack
 

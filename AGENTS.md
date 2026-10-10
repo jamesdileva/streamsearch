@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 â””â”€â”€ .gitignore
 ```
 
-Current state: Sprint 12.1 done - TikTok feasibility researched in `docs/tiktok-feasibility.md`: **NO-GO**. No official TikTok API exposes live-stream discovery (Research API is academic-approval-gated and VOD-only; API v2/Display/Content Posting are creator-scoped). All live access is undocumented/reverse-engineered, which the product boundary rules out; access is also creator-keyed, so an event-first discovery query doesn't exist even illegally. Adapter stays deferred; re-evaluate only if an official, developer-accessible live-search API ships. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
+Current state: Sprint 13.1 done - transcript relevance evaluated in `docs/transcript-relevance.md`: **NO-GO**. `captions.download` requires OAuth 2.0 and owner-level edit permission, so transcripts of third-party streams (the ones a discovery engine needs) are not legitimately accessible; `captions.list`+download also cost 250 units/stream. Undocumented caption endpoints remain out of bounds (same boundary as Sprint 12.1 TikTok). `vague-title` gap stays open and labelled unclosable legitimately. Phase 13 experiments remaining: 13.2 event detection, 13.3 CV (also expected NO-GO). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

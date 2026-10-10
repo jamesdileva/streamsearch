@@ -793,3 +793,37 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   10-member hurricane proposal. No secrets in logs; `.db` and boot files
   cleaned up after runs.
 - Commit: (this worklog entry pending)
+
+## 2026-10-10 — Sprint 14.1 Saved Searches
+
+- Sprint: 14.1 (Goal: allow users to monitor topics)
+- Branch: `feat/14-1-saved-searches`
+- Design constraint: there are no accounts and none are planned (architecturally deferred),
+  and a server-side list would be shared by everyone — a privacy problem. So **saved searches
+  are client-local**: `localStorage` under `streamsearch:saved-searches`, most-recent-first,
+  capped at 25.
+- What: `lib/saved-searches.ts` (`load`/`save`/`remove`, storage-injectable so tests need no
+  DOM) + `components/SavedSearches.tsx` (presentation-only: list, run, remove, save-current)
+  + App wiring (run restores the exact query *and* filters; changing a filter clears the
+  active highlight so a modified run is never mistaken for the saved one).
+- Robustness: corrupt/invalid JSON or individual bad entries fail soft to an empty/partial
+  list rather than breaking the page; `save` on a whitespace-only query returns `null` and
+  writes nothing; duplicate query+filters is a no-op; storage quota/private-mode is caught so
+  the session still works in memory. The active-entry highlight is `activeSavedId`, distinct
+  from "has run a search".
+- Verification:
+  - Backend: `python -m pytest -q` → **268 passed** and `ruff` clean. This sprint also fixed
+    two lint findings left over from 13.2 (FURB192 `min()` over `sorted()[0]` in
+    `events.py`; C401 set comprehension in `test_event_detection.py`) — worth admitting,
+    since 13.2 shipped while ragged.
+  - Frontend: `npm run typecheck` OK; `npm run lint` (oxlint) clean; `npm run test` → **64
+    passed** (17 new: 10 lib tests covering parse-drops-junk/keeps-valid/caps-at-25,
+    round-trip, empty-query rejection, duplicate suppression, filters-make-distinct,
+    newest-first, remove-only-id; 4 component tests; 3 App-level effects).
+  - Live smoke (real key): `GET /api/search?q=wildfire` → 10 results; frontend dev server
+    200. Saved-searches behaviour is browser-local and covered by unit tests.
+  - Secrets: staged leak check empty.
+- Notes: no cross-device sync, and no run-count / "last run" badge (deferred with alerts, since
+  "notify when new results appear" is the 14.2 concern). If sync is ever wanted it needs
+  accounts, which remain deferred per `architecture.md`.
+- Commit: (this worklog entry pending)

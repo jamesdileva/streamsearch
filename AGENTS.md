@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 â””â”€â”€ .gitignore
 ```
 
-Current state: Phase 13 complete. 13.2 event detection: works on live data (`GET /api/events?q=` prototype, NOT wired to search) — recall 2/2 and precision 5/5 on the labeled set, and on live YouTube the `storm` query grouped all 10 Hurricane Isaias broadcasts into one event with no false merges afterwards; verdict is "keep prototype, don't ship as a ranking feature" pending a larger sample (`docs/event-detection.md`). 13.3 CV: **NO-GO without an experiment** — decoding frames violates the enforced metadata-only boundary of §11.1, and small-VLM reliability plus GPU/cost make it unaffordable. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
+Current state: Sprint 14.1 done - saved searches (`lib/saved-searches.ts` + `SavedSearches` component): re-save an existing query+filters or run/remove it from the list; persisted in `localStorage` under `streamsearch:saved-searches`, capped at 25, corrupt entries fail soft, and empty queries are refused. No accounts (cross-device sync would need them — still deferred per architecture.md). Sprint 14.2 live alerts remain deferred. `ruff`/`oxlint` clean; backend run via `python -m`.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

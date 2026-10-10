@@ -44,48 +44,4 @@ Sprint 13.1 done — transcript relevance: **NO-GO** in `docs/transcript-relevan
 
 Sprint 13.2 done — event detection works on live data; kept as an inspectable prototype (`GET /api/events?q=`), NOT wired to search. Recall 2/2 and precision 5/5 on the labeled set, and live YouTube `storm` grouped all 10 Hurricane Isaias broadcasts into one event. Verdict: keep prototype, don't ship as a ranking feature, pending a larger sample (`docs/event-detection.md`).
 
-Sprint 13.3 — computer vision: **NO-GO without an experiment** — decoding frames violates the enforced metadata-only boundary of `docs/content-boundaries.md`, and small-VLM reliability plus GPU/cost make it unaffordable. Next: `docs/sprint-roadmap.md` (Phase 14 alerts & saved searches).
-
-## Target stack
-
-- Frontend: React + Vite + TypeScript
-- Backend: Python + FastAPI
-- Storage (PoC): SQLite
-- Search (MVP): deterministic scoring; FTS later; embeddings only if proven needed
-- Cache (MVP): in-memory short-lived server cache
-
-## Quickstart
-
-```powershell
-# backend (from backend/)
-# copy ../.env.example to .env first, fill keys
-pip install -r requirements.txt
-python -m uvicorn app.main:app --reload   # http://localhost:8000/api/health
-
-# frontend (from frontend/)
-# copy .env.example to .env (VITE_API_URL=http://localhost:8000)
-npm install
-npm run dev                               # http://localhost:5173
-```
-
-## Checks (Sprint 0.1 toolchain — enforced)
-
-```powershell
-# backend (from backend/)
-python -m pytest -q
-python -m ruff check .
-
-# frontend (from frontend/)
-npm run typecheck   # tsc --noEmit
-npm run lint        # oxlint
-npm run test        # vitest run
-npm run build
-```
-
-- Backend health: `GET /api/health`
-- Search: `GET /api/search?q=wildfire` → `{query, results[], count}`
-- Never commit `.env`. Never expose API keys in frontend.
-
-## MVP done when
-
-User can open site → search topic/event → get normalized YouTube results → see live/freshness + source/creator → watch via embed or open source → report bad results → repeat searches without excessive API use.
+Sprint 13.3 — computer vision: **NO-GO without an experiment** — decoding frames violates the enforced metadata-only boundary of `docs/content-boundaries.md`, and small-VLM reliability plus GPU/cost make it unaffordable. Sprint 14.1 done — saved searches: re-save an existing query+filters, or run/remove it from the list. Persisted in `localStorage` under `streamsearch:saved-searches` (cap 25, corrupt entries fail soft, empty queries refused). No accounts — cross-device sync would need them and stays deferred per `architecture.md`. Sprint 14.2 live alerts deferred. Twitch/Kick live verification deferred pending their API keys.

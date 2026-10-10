@@ -83,7 +83,7 @@ def test_related_groups_are_recalled():
     """Every known same-event group must be detected as one event."""
     for name, group in RELATED.items():
         proposals = detect_events(group)
-        matched = [p for p in proposals if set(p.related_streams) == set(s.id for s in group)]
+        matched = [p for p in proposals if set(p.related_streams) == {s.id for s in group}]
         assert matched, f"missed related group: {name} (got {proposals})"
 
 

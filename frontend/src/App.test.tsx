@@ -252,7 +252,7 @@ test('language options come from results and refetch on change', async () => {
   const options = screen
     .getByRole('combobox', { name: 'Language' })
     .querySelectorAll('option');
-  // Only reported languages appear — 'null' never becomes an option.
+  // Only reported languages appear â€” 'null' never becomes an option.
   expect([...options].map((o) => o.getAttribute('value'))).toEqual(['', 'en', 'ja']);
 
   fireEvent.change(screen.getByRole('combobox', { name: 'Language' }), {
@@ -328,7 +328,7 @@ test('partial outage shows a notice but keeps healthy results', async () => {
 
 test('rate-limit message is surfaced instead of a bare status code', async () => {
   vi.spyOn(api, 'searchStreams').mockRejectedValue(
-    new Error('too many requests � slow down and retry shortly'),
+    new Error('too many requests — slow down and retry shortly'),
   );
   render(<App />);
   submitQuery('wildfire');

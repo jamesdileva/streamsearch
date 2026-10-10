@@ -596,3 +596,46 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
     `fake/…` are not, so the UI correctly offers Watch vs Open Source per record.
   - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
 - Commit: (this worklog entry pending)
+
+## 2026-10-09 — Sprint 11.2 Search Abuse Controls
+
+- Sprint: 11.2 (Goal: prevent search becoming a mechanism for abusive targeting)
+- Branch: `feat/11-2-search-abuse`
+- Framing: the roadmap says *evaluate, implement only controls justified by observed/product
+  requirements*. This sprint is a documented evaluation plus **one** implemented control, not a
+  content-moderation system.
+- Evaluation of all five areas (findings verified in code, not assumed):
+  - **Spam queries** — already controlled in 10.2 (200-char cap, control chars, repeated filler,
+    rate limit). Verified live: 400-char → 422, `bad\x01query` → 422, legit query → 3 results.
+  - **Malicious metadata** — frontend has no `innerHTML`/`dangerouslySetInnerHTML` (scanned every
+    `.tsx`), React escapes title/channel/description; backend stores verbatim and uses
+    parameterized/static SQL. Channel titles are attacker-controlled text, so this matters —
+    already safe by construction.
+  - **Doxxing-style searches** — result surface is public broadcasts only (title/channel/
+    viewers/thumbnail). No accounts, no cross-search profile, no PII beyond ephemeral bucketing.
+    No control built: intent detection needs content classification, which is out of scope for an
+    index.
+  - **PII exposure** — queries never persisted (request scope + 60s in-memory cache, digest-only
+    logging from 10.2). **One real gap found: raw client IPs written to logs** on rate-limit
+    rejection, indefinitely retained.
+  - **Platform-specific abuse** — intent, not signal. Out of scope; the report button (2.3) is
+    the user-facing path.
+- Implemented: `mask_ip()` in `app/api/deps.py` — logs keep the /24 (IPv4) or /64 (IPv6) prefix
+  plus an 8-char digest, dropping the host part. In-memory bucket key unchanged, so rate-limit
+  behaviour is identical. Rationale in the docstring.
+- Tests: `tests/test_abuse.py` (15 new) — no `innerHTML` in any `.tsx`; payload metadata
+  round-trips verbatim (never interpreted); queries/metrics never persist query text; a rejected
+  over-limit query never leaks its marker to logs; raw IPs never appear in logs while prefix +
+  correlation survive; IPv4/IPv6/malformed masking; spam rejected vs legit queries allowed (incl.
+  short repeats like "go go go"); no history/queries endpoint; `/api/stats` leaks no client
+  identity.
+- Verification:
+  - Backend: `python -m pytest -q` → **260 passed**; `python -m ruff check .` → clean
+  - Live: 400-char → 422 envelope; control chars → 422; legit → 3 results; rate-limit burst
+    behaved; logs show `query rejected: too_long len=400 digest=…` and `… control_chars digest=…` —
+    no raw query text, no raw IPs
+  - Secrets: staged leak check empty (incl. `.db`); no `.env`/creds tracked
+- Decision recorded: what was deliberately NOT built — keyword blocklists, content classifier,
+  `is_mature` filtering (still open from 9.2), and query logging for "abuse forensics" (which
+  would itself be the privacy violation).
+- Commit: (this worklog entry pending)

@@ -714,3 +714,35 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   `Select-String`, a contradictory combination that produced a false positive. Lesson: for
   secret scanning use an exact `Contains()` check, never that flag combination. The stray
   log files were deleted and the repo re-verified clean.
+
+## 2026-10-10 — Sprint 13.1 Caption/Transcript Relevance
+
+- Sprint: 13.1 (Goal: determine whether transcript indexing is practical and useful)
+- Branch: `feat/13-1-transcript-relevance`
+- What: `docs/transcript-relevance.md` — evaluation, no code. Nothing was built.
+- Motivating case: the `vague-title` gap from Sprint 7.1 (a stream titled "LIVE" is unrankable by
+  any text ranker). A transcript would supply the missing text.
+- Blocking finding (primary-source):
+  - YouTube's documented `captions.download` reference states verbatim: **"This method requires
+    the user to have permission to edit the video."** It also requires OAuth 2.0 (not an API key)
+    and carries a quota cost of **200 units**; `captions.list` (track IDs) is another **50 units**
+    and also OAuth required.
+  - Consequence 1 — **not third-party**. StreamSearch discovers streams broadcast by other
+    channels; an API key cannot download them, and we are never the owner, so every transcript
+    worth indexing is inaccessible.
+  - Consequence 2 — **not cheap**. 250 units/stream would exhaust the daily quota almost
+    immediately at discovery-corpus scale.
+  - No alternative documented path: `videos.list?part=contentDetails` exposes only a boolean
+    `contentDetails.caption` flag, never text. Auto-generated captions get no exemption.
+  - The only remaining access is undocumented player/timedtext endpoints — the same
+    reverse-engineered boundary ruled out for TikTok in Sprint 12.1, so not an option.
+- Consequence for the gap: `vague-title` stays open and stays honestly labelled as the one 7.1
+  failure class that cannot be closed legitimately (no text for keyword; no signal for semantic;
+  no legitimate access to the one text source that could help). Noted that the best available
+  behaviour is to lean on the other fields and show the creator, not pretend to know the topic.
+- **Verdict: NO-GO.** Re-evaluation criteria written into the doc (documented API for videos you
+  don't own; cost compatible with a live corpus; terms permitting index-by-search).
+- Verification: research/documentation only — no code changed, `git status` confirms nothing else
+  touched; full suite re-run green as a no-regression check (260 tests).
+- No secrets involved.
+- Commit: (this worklog entry pending)

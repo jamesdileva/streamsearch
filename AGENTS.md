@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 â””â”€â”€ .gitignore
 ```
 
-Current state: Sprint 13.1 done - transcript relevance evaluated in `docs/transcript-relevance.md`: **NO-GO**. `captions.download` requires OAuth 2.0 and owner-level edit permission, so transcripts of third-party streams (the ones a discovery engine needs) are not legitimately accessible; `captions.list`+download also cost 250 units/stream. Undocumented caption endpoints remain out of bounds (same boundary as Sprint 12.1 TikTok). `vague-title` gap stays open and labelled unclosable legitimately. Phase 13 experiments remaining: 13.2 event detection, 13.3 CV (also expected NO-GO). Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
+Current state: Phase 13 complete. 13.2 event detection: works on live data (`GET /api/events?q=` prototype, NOT wired to search) — recall 2/2 and precision 5/5 on the labeled set, and on live YouTube the `storm` query grouped all 10 Hurricane Isaias broadcasts into one event with no false merges afterwards; verdict is "keep prototype, don't ship as a ranking feature" pending a larger sample (`docs/event-detection.md`). 13.3 CV: **NO-GO without an experiment** — decoding frames violates the enforced metadata-only boundary of §11.1, and small-VLM reliability plus GPU/cost make it unaffordable. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

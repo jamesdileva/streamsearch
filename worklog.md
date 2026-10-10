@@ -827,3 +827,36 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   "notify when new results appear" is the 14.2 concern). If sync is ever wanted it needs
   accounts, which remain deferred per `architecture.md`.
 - Commit: (this worklog entry pending)
+
+## 2026-10-10 — Hardening: Refresh Trigger Auth
+
+- Sprint: hardening (small). Closes the "auth on /api/refresh is still owed" gap recorded in
+  Sprint 10.2. Branch: `feat/hardening-refresh-auth`.
+- Problem: `POST /api/refresh` spends platform quota but was unauthenticated — rate-limited only.
+  That was the only recorded security exposure.
+- Change: bearer token via `REFRESH_TOKEN`.
+  - **Fail closed:** unconfigured (the default) → `503 {"error": {"code": 503, "message":
+    "refresh endpoint is not configured"}}`. An open-by-default quota-spending endpoint was the
+    exposure.
+  - wrong/missing/malformed token → `401` + `WWW-Authenticate: Bearer` (RFC-compliant challenge).
+  - comparison is constant-time (`secrets.compare_digest`), so the token cannot be recovered via
+    response-timing differences.
+  - background refresh loop (Sprint 4.3) unchanged and credential-free.
+- **Second bug found and fixed while testing:** the error envelope handler rebuilt the response
+  without `exc.headers`, so it was silently dropping exception headers — the 401 challenge header
+  never reached clients. Now preserved in `errors.py`. This is exactly the kind of bug that only
+  shows up when you actually assert on the header, which is what the new test does.
+- Verification:
+  - `python -m pytest -q` → **274 passed** (6 new in `tests/test_refresh_auth.py`: no-config→503,
+    good-token→200, wrong→401+challenge-header, missing→401, malformed→401, and public endpoints
+    unaffected). Two pre-existing tests (`test_refresh`, `test_ratelimit`) updated for the new
+    fail-closed default — they were asserting the old open behaviour.
+  - `python -m ruff check .` clean.
+  - Live (real key, real token generated): no token configured → 503; good token → **200**; bad
+    token → **401**; `/api/health` and `/api/search` still 200 (token guards quota-spending ops
+    only). `WWW-Authenticate` verified on a later pass.
+  - Secrets: `.env` remains gitignored and untracked; the generated token never appears in
+    commits or logs.
+- Deferred (unchanged): Twitch/Kick live verification pending keys (procedures in README/worklog),
+  alerts (14.2), Phase 15 experiments.
+- Commit: (this worklog entry pending)

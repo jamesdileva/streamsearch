@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 â””â”€â”€ .gitignore
 ```
 
-Current state: Sprint 14.1 done - saved searches (`lib/saved-searches.ts` + `SavedSearches` component): re-save an existing query+filters or run/remove it from the list; persisted in `localStorage` under `streamsearch:saved-searches`, capped at 25, corrupt entries fail soft, and empty queries are refused. No accounts (cross-device sync would need them — still deferred per architecture.md). Sprint 14.2 live alerts remain deferred. `ruff`/`oxlint` clean; backend run via `python -m`.
+Current state: Hardening sprint done - `POST /api/refresh` now requires a bearer token (`REFRESH_TOKEN`); unconfigured means 503/disabled (fail closed, not open), wrong/missing/malformed token is 401 with `WWW-Authenticate: Bearer`. Comparison is constant-time (`secrets.compare_digest`). Also fixed the envelope handler silently dropping exception headers (the 401 challenge header was being lost). Background refresh loop unaffected and credential-free. `ruff`/`oxlint` clean; backend via `python -m`. Still deferred: Twitch/Kick live verification pending their API keys (procedures in README/worklog), alerts (14.2), and the Phase 15 experiments.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

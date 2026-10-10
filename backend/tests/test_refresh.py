@@ -140,7 +140,10 @@ def test_pass_prunes_old_ended(isolated_db):
     assert index.get_stream("stub", "old") is None
 
 
-def test_trigger_endpoint_shape(isolated_db):
-    body = client.post("/api/refresh").json()
+def test_trigger_endpoint_shape(isolated_db, monkeypatch):
+    monkeypatch.setattr(settings, "refresh_token", "t")
+    body = client.post(
+        "/api/refresh", headers={"Authorization": "Bearer t"}
+    ).json()
     assert set(body) == {"checked", "refreshed", "ended", "pruned", "errors"}
     assert isinstance(body["errors"], list)

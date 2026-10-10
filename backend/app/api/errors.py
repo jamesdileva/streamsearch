@@ -22,8 +22,12 @@ def _envelope(status_code: int, message: str) -> dict:
 
 async def _http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
     detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+    # Preserve headers (e.g. WWW-Authenticate on 401) — rebuilding the
+    # response would otherwise silently drop them.
     return JSONResponse(
-        status_code=exc.status_code, content=_envelope(exc.status_code, detail)
+        status_code=exc.status_code,
+        content=_envelope(exc.status_code, detail),
+        headers=exc.headers,
     )
 
 

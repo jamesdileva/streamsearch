@@ -48,6 +48,10 @@ class Settings:
     rate_limit_search_window: int = int(os.getenv("RATE_LIMIT_SEARCH_WINDOW", "60"))
     rate_limit_refresh: int = int(os.getenv("RATE_LIMIT_REFRESH", "2"))
     rate_limit_refresh_window: int = int(os.getenv("RATE_LIMIT_REFRESH_WINDOW", "300"))
+    # Hardening: the manual refresh trigger is quota-bearing and therefore
+    # authenticated. Empty (the default) means DISABLED — fail closed, so an
+    # unconfigured deployment is never accidentally open.
+    refresh_token: str = os.getenv("REFRESH_TOKEN", "")
 
 
 settings = Settings()

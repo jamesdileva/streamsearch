@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 
 from app.api import deps
 from app.api.queryguard import MAX_QUERY_LENGTH, QueryRejected, validate_query
+from app.config import settings
 from app.main import app
 from app.services.ratelimit import RateLimiter, Rule
 
@@ -67,11 +68,17 @@ def test_unknown_scope_fails_open():
     assert remaining == -1
 
 
-def test_refresh_is_limited_tightly():
+def test_refresh_is_limited_tightly(monkeypatch):
+    deps.limiter.reset()
     deps.limiter.add_rule("refresh", Rule(limit=2, window_seconds=300))
-    codes = [client.post("/api/refresh").status_code for _ in range(3)]
-    assert codes[:2] == [200, 200]
-    assert codes[2] == 429
+    monkeypatch.setattr(settings, "refresh_token", "t")
+    codes = [
+        client.post(
+            "/api/refresh", headers={"Authorization": "Bearer t"}
+        ).status_code
+        for _ in range(3)
+    ]
+    assert codes == [200, 200, 429]
 
 
 def test_health_is_not_rate_limited():

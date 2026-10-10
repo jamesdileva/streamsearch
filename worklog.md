@@ -705,4 +705,12 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
 - Quota observed: ~5 searches × ~101 units ≈ 505 units of YouTube's daily quota.
 - Still pending the same treatment: `TWITCH_CLIENT_ID/SECRET` (Sprint 5.2) and
   `KICK_CLIENT_ID/SECRET` (Sprint 9.2) — both recorded as deferred in their worklog entries.
-- Secrets: key never printed or committed; smoke `.db` files removed after each run.
+- Secrets: key never printed or committed; git confirms it is in no tracked file.
+- **False-positive correction:** a first log scan reported the key present in uvicorn's
+  `boot.err`. Re-checked three ways — `--env-file` alone, `--env-file --reload`, and a
+  fresh `[System.IO.File]::ReadAllText(...).Contains(key)` check — and the key is **not**
+  in the logs; uvicorn only logs `Loading environment from '<path>'`. The original scan was
+  faulty: it passed both `-Pattern [regex]::Escape($key)` and `-SimpleMatch` to
+  `Select-String`, a contradictory combination that produced a false positive. Lesson: for
+  secret scanning use an exact `Contains()` check, never that flag combination. The stray
+  log files were deleted and the repo re-verified clean.

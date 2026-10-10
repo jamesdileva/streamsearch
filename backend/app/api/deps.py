@@ -7,11 +7,45 @@ set up a trusted-proxy middleware and adapt `client_key` deliberately.
 
 import hashlib
 import logging
+import secrets
 
-from fastapi import Depends, Request
+from fastapi import Depends, HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from app.config import settings
+
+logger = logging.getLogger(__name__)
+
+_bearer = HTTPBearer(auto_error=False)
+
+
+def require_refresh_token(
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),  # noqa: B008 - FastAPI idiom
+) -> None:
+    """Guard the manual refresh trigger.
+
+    Fail-closed in both directions:
+    - no token configured (default) -> 503, endpoint disabled;
+    - wrong/missing token -> 401.
+
+    An open-by-default operational endpoint that spends quota was the
+    exposure this closes (hardening sprint after 10.2).
+    """
+    configured = settings.refresh_token
+    if not configured:
+        raise HTTPException(
+            status_code=503, detail="refresh endpoint is not configured"
+        )
+    presented = credentials.credentials if credentials else ""
+    if not presented or not secrets.compare_digest(presented, configured):
+        logger.info("refresh denied: bad credentials")
+        raise HTTPException(
+            status_code=401,
+            detail="missing or invalid bearer token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 from app.api.queryguard import QueryRejected, validate_query
-from app.config import settings
 from app.services.ratelimit import RateLimiter, Rule
 
 logger = logging.getLogger(__name__)

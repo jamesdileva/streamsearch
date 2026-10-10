@@ -38,7 +38,7 @@ python -m uvicorn app.main:app --reload
 
 Sprint 10.2 done - rate limiting + abuse protection: in-memory sliding-window limiter (search 60/min, refresh 2/5min, per-peer, X-Forwarded-For deliberately ignored, unknown scopes fail open), query validation (200 chars, control chars, repeated filler) with privacy-safe logging (length + digest, never raw input), and 429/422 error envelopes.
 
-Sprint 11.1 done — content boundaries documented in `docs/content-boundaries.md`, each claim marked enforced or gap, with tests pinning both. Enforced: source attribution, embed gating, no-proxy links, metadata-only storage. Gaps: no takedown/removal path, `is_mature` captured but not surfaced, reports advisory only. Next: `docs/sprint-roadmap.md` (11.2 search abuse controls).
+Sprint 11.2 done — search abuse controls evaluated and documented in `docs/abuse-controls.md`. One control implemented: client IPs are masked in logs (`mask_ip`, /24 or /64 prefix + digest) because full IPs in retained logs are unnecessary PII. Everything else was already safe by construction: no `dangerouslySetInnerHTML` anywhere (React escapes platform metadata), search queries are never persisted (request scope + 60s cache, digest-only logging), spam guards shipped in 10.2. Doxxing/targeting controls deliberately NOT built — intent detection is out of scope for an index. Phase 11 complete. Next: `docs/sprint-roadmap.md` (12.1 TikTok feasibility research).
 
 ## Target stack
 

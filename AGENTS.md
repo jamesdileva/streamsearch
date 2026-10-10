@@ -33,7 +33,7 @@ Toolchain (locked in Sprint 0.1, enforce every sprint):
 â””â”€â”€ .gitignore
 ```
 
-Current state: Sprint 11.1 done - content boundaries documented in `docs/content-boundaries.md` with each claim marked enforced or gap. Enforced: source attribution, embed gating, no-proxy links, metadata-only storage (no media bytes anywhere). Gaps recorded honestly: no takedown/removal path exists (`DELETE` is absent — pruning of ended records is the only removal), `is_mature` is captured but not surfaced (policy decision open), reports are advisory only. Boundary tests in `tests/test_boundaries.py` pin these claims so the docs can't silently drift. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
+Current state: Sprint 11.2 done - search abuse controls evaluated and documented in `docs/abuse-controls.md`. One control implemented: client IPs are masked in logs (`mask_ip`, /24 or /64 prefix + digest) because full IPs in retained logs are unnecessary PII. Everything else was already safe by construction: no `dangerouslySetInnerHTML` anywhere (React escapes platform metadata), search queries are never persisted (request scope + 60s cache, digest-only logging), spam guards shipped in 10.2. Doxxing/targeting controls deliberately NOT built - intent detection is out of scope for an index. Phase 11 complete. Formatter/linter choices locked: backend `ruff`, frontend `oxlint`; backend run via `python -m` if shims are not on PATH.
 
 ## 3b. Sprint loop (mandatory for every sprint)
 

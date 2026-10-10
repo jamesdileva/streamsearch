@@ -5,6 +5,7 @@ client-supplied header would let anyone forge a bucket. Behind a real proxy,
 set up a trusted-proxy middleware and adapt `client_key` deliberately.
 """
 
+import hashlib
 import logging
 
 from fastapi import Depends, Request
@@ -41,6 +42,26 @@ def client_key(request: Request) -> str:
     return request.client.host if request.client else "unknown"
 
 
+def mask_ip(ip: str) -> str:
+    """Mask a client address for logging.
+
+    The IP is the abuse-control key, but persisting raw addresses in
+    indefinitely-retained logs is unnecessary PII collection (Sprint 11.2).
+    Keep the network prefix (enough to see "one client is hammering us")
+    plus a short digest (enough to correlate the same client across
+    events), and drop the exact host part.
+    """
+    if ip.count(".") == 3:  # IPv4: keep /24
+        prefix = ip.rsplit(".", 1)[0]
+    elif ":" in ip:  # IPv6: keep the /64 prefix
+        groups = ip.split(":")
+        prefix = ":".join(groups[:4])
+    else:
+        prefix = "unknown"
+    digest = hashlib.sha256(ip.encode("utf-8")).hexdigest()[:8]
+    return f"{prefix}.x#{digest}"
+
+
 def rate_limit(scope: str):
     def guard(
         request: Request,
@@ -50,7 +71,9 @@ def rate_limit(scope: str):
 
         allowed, _remaining = limiter.check(scope, client)
         if not allowed:
-            logger.info("rate_limited scope=%s client=%s", scope, client)
+            logger.info(
+                "rate_limited scope=%s client=%s", scope, mask_ip(client)
+            )
             raise HTTPException(
                 status_code=429,
                 detail="too many requests — slow down and retry shortly",

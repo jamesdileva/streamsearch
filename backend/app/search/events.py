@@ -180,7 +180,7 @@ def detect_events(streams: list[Stream]) -> list[EventProposal]:
             EventProposal(
                 topic=topic or "",
                 family=family or "",
-                place=sorted(places)[0] if places else None,
+                place=min(places) if places else None,
                 started_at=min(starts) if starts else None,
                 entities=sorted(entities),
                 related_streams=[s.id for s in group],

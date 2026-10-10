@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import PlatformNotice from './components/PlatformNotice';
 import ResultsList from './components/ResultsList';
+import SavedSearches from './components/SavedSearches';
 import SearchBar from './components/SearchBar';
 import SearchFilters from './components/SearchFilters';
 import WatchModal from './components/WatchModal';
 import { DEFAULT_FILTERS, type FilterState } from './lib/filters';
+import { load, remove, save } from './lib/saved-searches';
+import type { SavedSearch } from './lib/saved-searches';
 import { fetchHealth, searchStreams } from './services/api';
 import type { PlatformStatus, Stream } from './types';
 
@@ -30,6 +33,10 @@ export default function App() {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [submitted, setSubmitted] = useState<string | null>(null);
   const [watching, setWatching] = useState<Stream | null>(null);
+  // Saved searches live in this browser (no accounts by design); loaded
+  // once, lazily, so there is no cascade of renders.
+  const [saved, setSaved] = useState<SavedSearch[]>(load);
+  const [activeSavedId, setActiveSavedId] = useState<string | null>(null);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -71,7 +78,26 @@ export default function App() {
 
   const changeFilters = (next: FilterState) => {
     setFilters(next);
+    setActiveSavedId(null);
     if (submitted) execute(submitted, next);
+  };
+
+  const saveCurrent = () => {
+    if (!submitted) return;
+    const next = save(submitted, filters);
+    if (next) setSaved(next);
+  };
+
+  const runSaved = (entry: SavedSearch) => {
+    setFilters(entry.filters);
+    setSubmitted(entry.query);
+    setActiveSavedId(entry.id);
+    execute(entry.query, entry.filters);
+  };
+
+  const removeSaved = (id: string) => {
+    setSaved(remove(id));
+    if (activeSavedId === id) setActiveSavedId(null);
   };
 
   // "Where available" for both dimensions: only values actually present in
@@ -106,6 +132,15 @@ export default function App() {
         value={filters}
         disabled={search.status === 'loading'}
         onChange={changeFilters}
+      />
+
+      <SavedSearches
+        saved={saved}
+        activeId={activeSavedId}
+        disabled={search.status === 'loading'}
+        onRun={runSaved}
+        onSave={saveCurrent}
+        onRemove={removeSaved}
       />
 
       <section aria-label="search results" aria-live="polite">

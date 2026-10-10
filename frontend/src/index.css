@@ -451,3 +451,69 @@ code {
     gap: 10px;
   }
 }
+
+/* Sprint 14.1 saved searches */
+.saved-searches {
+  margin-top: 24px;
+  text-align: left;
+}
+
+.saved-searches__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.saved-searches__head h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.saved-searches .saved-empty {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.saved-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.saved-item {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.saved-item--active {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.saved-item__run {
+  font: inherit;
+  font-size: 13px;
+  border: 0;
+  background: none;
+  color: var(--text-h);
+  cursor: pointer;
+  padding: 6px 12px;
+}
+
+.saved-item__remove {
+  font: inherit;
+  border: 0;
+  border-left: 1px solid var(--border);
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 6px 10px;
+}

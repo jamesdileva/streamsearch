@@ -639,3 +639,36 @@ Format per sprint: date, sprint, branch, what changed, verification + result, co
   `is_mature` filtering (still open from 9.2), and query logging for "abuse forensics" (which
   would itself be the privacy violation).
 - Commit: (this worklog entry pending)
+
+## 2026-10-09 — Sprint 12.1 TikTok Feasibility (research only, no adapter)
+
+- Sprint: 12.1 (Goal: decide whether TikTok can be integrated legitimately and sustainably)
+- Branch: `feat/12-1-tiktok-feasibility`
+- What: `docs/tiktok-feasibility.md` — decision record. No adapter written (and none will be,
+  absent a change on TikTok's side).
+- Findings:
+  - TikTok's official platform exposes: Research API, TikTok API v2 (`/v2/video/query/`),
+    Content Posting API, Display API.
+  - **Research API is the closest option and still a dead end**: eligibility is limited to
+    "independent and academic researchers who conduct research on a not-for-profit basis", and it
+    is **VOD-only** — the video codebook has creation time, likes, comments, subtitles, duration,
+    view count; there is no live status, live start time, or live viewer count.
+  - **TikTok API v2 / Display / Content Posting are creator-scoped**, not platform-scoped:
+    `video.query` verifies the videos "belong to the user". No platform-wide search or live
+    listing exists.
+  - **All actual TikTok LIVE access is undocumented** — open-source clients reverse-engineer
+    TikTok's internal Webcast/signing services and their own docs state "TikTok does not offer a
+    public official API for reading livestream events"; paid third-party services wrap the same
+    endpoints and are explicitly unaffiliated with TikTok.
+  - **Deeper mismatch independent of legality**: every available tool is creator-keyed — you
+    connect to a username you already know. There is no "live broadcasts about X" query anywhere,
+    so an event-first product would have nothing to search even if ToS risk were acceptable.
+- **Verdict: NO-GO.** Adapter stays deferred. This is the same flip-condition recorded in
+  `docs/kick-feasibility.md` ("findings that undocumented access would be required").
+- Re-evaluation criteria written into the doc: an official API with live-stream search/listing,
+  access for non-academic developers, live status + start time + viewer count in responses, and
+  documented embedding permissions.
+- Verification: research/documentation only — no code changed, `git status` confirms nothing else
+  touched. Full suite (260 tests) still green as a no-regression check.
+- Secrets: n/a, nothing staged.
+- Commit: (this worklog entry pending)
